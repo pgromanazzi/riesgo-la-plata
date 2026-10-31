@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f4e50">
+  <meta name="description" content="Visor de delegaciones, barrios y protocolos del Programa de Reducción del Riesgo por Inundaciones de La Plata.">
+  <title>Riesgo hídrico · La Plata</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="vendor/leaflet/leaflet.js" defer></script>
+  <script type="module" src="assets/app.mjs"></script>
+</head>
+<body>
+  <a class="skip-link" href="#search">Ir al buscador de barrios</a>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Riesgo hídrico La Plata, inicio">
+      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2 38 20 20 38 2 20Z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M20 8 32 20 20 32 8 20Z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 20h24M20 8v24" stroke="currentColor" stroke-width="1.5"/></svg>
+      <span><strong id="site-title">Riesgo hídrico · La Plata</strong><small id="site-subtitle">Programa de Reducción del Riesgo por Inundaciones</small></span>
+    </a>
+    <div class="header-actions"><span class="edition" id="edition">Vista de referencia</span><button id="help-button" class="help-button" aria-label="Cómo usar el visor">? <span>Cómo usar el visor</span></button></div>
+  </header>
+  <div class="version-banner" id="data-notice" role="note">Capas del sitio de referencia · Actualización 2026 pendiente</div>
+  <main class="workspace">
+    <aside class="sidebar" aria-label="Explorar delegaciones y barrios">
+      <div class="sidebar-head">
+        <p class="eyebrow">CONSULTA TERRITORIAL</p>
+        <h1>Encontrá tu barrio</h1>
+        <p class="intro">Explorá el mapa y consultá su protocolo.</p>
+        <label class="search-box" for="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Nombre, código o delegación…" autocomplete="off" aria-label="Buscar barrio, código o delegación" disabled></label>
+        <label class="select-label" for="delegation-select">DELEGACIÓN</label>
+        <select id="delegation-select" disabled><option value="">Todas las delegaciones</option></select>
+        <div class="sidebar-stats" id="totals">Cargando cartografía…</div>
+      </div>
+      <div class="results-heading"><h2 id="results-heading">Delegaciones</h2><button id="reset-button" class="text-button" type="button">Ver todo</button></div>
+      <p id="results-count" class="sr-only" role="status" aria-live="polite"></p>
+      <div id="results" class="results" aria-labelledby="results-heading"><p class="empty">Cargando datos…</p></div>
+      <footer class="sidebar-footer"><span class="live-dot" aria-hidden="true"></span><span id="author">Pablo G. Romanazzi · PRRI La Plata</span><small id="data-date"></small></footer>
+    </aside>
+    <section class="map-shell" aria-label="Mapa de delegaciones y barrios">
+      <div id="map" aria-label="Mapa interactivo de La Plata" tabindex="0"></div>
+      <div class="map-breadcrumb" id="breadcrumb">PARTIDO DE LA PLATA <span>/</span> <strong>Vista general</strong></div>
+      <div class="map-actions"><button id="fit-button" title="Ajustar mapa a la selección" aria-label="Ajustar mapa a la selección"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6M8 12h8m-4-4v8"/></svg></button></div>
+      <div class="map-legend"><span class="legend-title">CAPAS DEL MAPA</span><label><input id="toggle-delegations" type="checkbox" checked><i class="swatch delegation"></i>Delegaciones</label><label><input id="toggle-neighborhoods" type="checkbox" checked><i class="swatch neighborhood"></i>Barrios</label><small>Los colores distinguen capas,<br>no niveles de peligrosidad.</small></div>
+      <article id="detail" class="detail" hidden aria-labelledby="detail-name">
+        <div class="detail-header"><span class="eyebrow">PROTOCOLO BARRIAL</span><button id="close-detail" class="icon-button" aria-label="Cerrar ficha de barrio">×</button></div>
+        <span id="detail-code" class="code-badge"></span><h2 id="detail-name"></h2><p id="detail-delegation" class="detail-delegation"></p>
+        <dl class="detail-facts"><div><dt>Cuenca</dt><dd id="detail-basin"></dd></div></dl>
+        <div class="detail-actions"><button id="open-protocol" class="primary-button">Ver protocolo <span aria-hidden="true">↗</span></button><button id="share-button" class="secondary-button">Copiar enlace al barrio</button></div>
+        <p class="protocol-note" id="protocol-note"></p>
+        <details id="recommendations"><summary>Recomendaciones del protocolo</summary><dl id="recommendation-content"></dl></details>
+      </article>
+      <p id="map-message" class="map-message" role="status" hidden></p>
+    </section>
+  </main>
+  <dialog id="protocol-dialog" class="protocol-dialog" aria-labelledby="protocol-title">
+    <div class="dialog-heading"><div><p class="eyebrow">DOCUMENTO DEL BARRIO</p><h2 id="protocol-title">Protocolo</h2></div><button id="close-protocol" class="icon-button" aria-label="Cerrar protocolo">×</button></div>
+    <div class="protocol-toolbar"><span id="protocol-origin"></span><a id="protocol-external" target="_blank" rel="noopener noreferrer">Abrir archivo ↗</a></div>
+    <div id="protocol-body" class="protocol-body"></div>
+  </dialog>
+  <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
+    <div class="dialog-heading"><h2 id="help-title">Cómo usar el visor</h2><button id="close-help" class="icon-button" aria-label="Cerrar ayuda">×</button></div>
+    <ol><li><strong>Elegí una delegación.</strong> Usá el listado, el selector o un clic sobre el mapa.</li><li><strong>Encontrá un barrio.</strong> Buscá por nombre, código o cuenca. Con una delegación elegida, la búsqueda se limita a ella.</li><li><strong>Consultá el protocolo.</strong> Seleccioná un barrio y presioná «Ver protocolo». Podés abrir el archivo en otra pestaña.</li><li><strong>Compartí la consulta.</strong> «Copiar enlace al barrio» conserva la selección. «Ver todo» vuelve al partido completo.</li></ol>
+    <div class="source-note"><strong>Datos de esta versión</strong><p id="help-source"></p><a id="source-link" target="_blank" rel="noopener noreferrer">Consultar el sitio de referencia ↗</a></div>
+  </dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <noscript><div class="fatal-message">Este visor necesita JavaScript para mostrar las capas y los protocolos.</div></noscript>
+  <script>if(location.protocol==='file:'){document.querySelector('#results').textContent='Para probar el visor, iniciá un servidor local según INSTRUCCIONES.html o publicalo en GitHub Pages.';}</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "fuente": "https://riesgolaplata.org/",
+  "fecha_descarga": "2026-10-31",
+  "estado": "Referencia publicada; no constituye la actualización 2026.",
+  "sha256_html_original": "beba10a58c523dc50081524232e417559bd2c9b29910aefbd346c0b95a2b5dbf",
+  "delegaciones": 24,
+  "barrios": 522,
+  "ajustes_de_nombres": [
+    {
+      "en_barrios": "JOAQUÍN GORINA",
+      "en_delegaciones": "GORINA",
+      "id": "D-10"
+    }
+  ],
+  "geometrias": "Coordenadas originales conservadas. WGS84, longitud/latitud.",
+  "protocolos": "Enlaces al sitio de referencia; no se han descargado los 522 archivos ni verificado todos los enlaces.",
+  "codigo": "Implementación nueva; no se incorpora el código de la página original."
+}
