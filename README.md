@@ -1,4 +1,4 @@
-# Visor de riesgo hídrico — La Plata
+# Visor de Protocolos barriales — La Plata
 
 Aplicación estática preparada para la cuenta `pgromanazzi` y GitHub Pages. Permite seleccionar delegaciones, consultar sus barrios, buscar por nombre/código/cuenca y abrir protocolos JPG, PNG, WebP o PDF. Funciona sin base de datos, compilación, claves de API ni dependencias de Node para la publicación.
 
