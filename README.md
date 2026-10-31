@@ -14,7 +14,7 @@ Los 522 protocolos están vinculados al servidor `riesgolaplata.org`, no incluid
 
 ## Etapa, versión y fecha de publicación
 
-La franja inferior a la cabecera muestra **Etapa III del Programa de Reducción del Riesgo por Inundaciones · 31/10/2026 - 3.0**. El distintivo superior muestra **Versión 3.0**.
+La franja inferior a la cabecera muestra **Etapa III del Programa de Reducción del Riesgo por Inundaciones · 31/10/2026 - 3.01**. El distintivo superior muestra **Versión 3.01**.
 
 En cada actualización publicada de esta etapa, incrementar `version` siguiendo la secuencia **3.0 → 3.01 → 3.02 → 3.03**, y registrar en `fecha_version` la fecha efectiva de publicación en Argentina con formato **dd/mm/aaaa**. Mantener `version` como texto para conservar el cero de 3.01. Estos valores se editan en `docs/config.json`; la interfaz compone la leyenda automáticamente. Actualizar también el texto inicial de `docs/index.html` y la revisión del módulo para evitar mostrar la versión anterior durante la carga.
 
