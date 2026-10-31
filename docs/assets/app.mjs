@@ -280,8 +280,8 @@ async function start() {
   map = L.map('map', { zoomControl: false, doubleClickZoom: false, scrollWheelZoom: true }).setView(config.centro, config.zoom);
   L.control.zoom({ position: 'topright', zoomInTitle: 'Acercar', zoomOutTitle: 'Alejar' }).addTo(map);
   L.control.scale({ position: 'bottomright', imperial: false, maxWidth: 100 }).addTo(map);
-  baseLayer = L.tileLayer('https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/mapabase_gris@EPSG%3A3857@png/{z}/{x}/{-y}.png', {
-    minZoom: 3, maxZoom: 18, attribution: '<a href="https://www.ign.gob.ar/AreaServicios/Argenmap/introduccion">IGN Argenmap</a> &middot; &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  baseLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    minZoom: 3, maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(map);
   let tileErrors = 0;
   baseLayer.on('tileerror', () => {

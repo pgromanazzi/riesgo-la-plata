@@ -4,20 +4,23 @@ Aplicación estática preparada para la cuenta `pgromanazzi` y GitHub Pages. Per
 
 ## Estado de la entrega
 
+**Publicado:** &lt;https://pgromanazzi.github.io/riesgo-la-plata/&gt;. Código fuente: &lt;https://github.com/pgromanazzi/riesgo-la-plata&gt;. GitHub Pages sirve la carpeta `docs/` de la rama `main` con HTTPS.
+
 El código es una implementación nueva. Incluye las **24 delegaciones y 522 barrios del sitio de referencia**, recuperados el 31/10/2026. Las geometrías y los textos de las fichas se conservan; los datos **no son la nueva actualización de 2026**. La etiqueta visible permite reconocer esta situación.
 
 Los 522 protocolos están vinculados al servidor `riesgolaplata.org`, no incluidos en este repositorio. Se ha comprobado la apertura de una muestra, no de todos los archivos. Al recibir los protocolos actualizados, se podrán alojar en `docs/protocolos/` y modificar `protocolos_base` a `protocolos/` para dejar de depender de ese servidor.
 
 **No hay monitoreo en tiempo real ni cálculo de rutas.** El visor presenta la información existente en las capas y archivos vinculados.
 
-## Publicación en GitHub Pages
+## Publicación y actualizaciones en GitHub Pages
 
-1. Crear un repositorio llamado `riesgo-la-plata` en la cuenta `pgromanazzi`, o usar otro nombre de repositorio para este proyecto.
-2. Subir **el contenido de esta carpeta**, manteniendo `docs/` como carpeta de primer nivel del repositorio.
-3. Abrir **Settings → Pages**.
-4. En **Source**, elegir **Deploy from a branch**.
-5. Elegir la rama **main** y la carpeta **/docs**. Guardar.
-6. Consultar la dirección que GitHub muestre cuando finalice la publicación. Para ese nombre de repositorio, la dirección prevista es `https://pgromanazzi.github.io/riesgo-la-plata/`; esta frase no confirma que esté publicado.
+La publicación ya está configurada en **Settings → Pages → Deploy from a branch → main → /docs**. Para actualizarla:
+
+1. Modificar los archivos del repositorio, manteniendo `docs/` como carpeta de primer nivel.
+2. Ejecutar los controles indicados en «Verificación».
+3. Confirmar los cambios en `main`.
+4. Esperar a que **Actions → pages build and deployment** termine correctamente. GitHub Pages publica los cambios de forma automática.
+5. Abrir &lt;https://pgromanazzi.github.io/riesgo-la-plata/&gt; y comprobar los barrios modificados y sus protocolos.
 
 GitHub documenta la publicación desde una rama y `/docs`: &lt;https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site&gt;.
 
@@ -106,14 +109,13 @@ Las pruebas que verifican los conteos de Gorina y casco corresponden a esta refe
 
 El 31/10/2026 pasaron los ocho ensayos automáticos y el control de los 546 polígonos (24 delegaciones y 522 barrios). Se comprobaron en navegador la búsqueda, los filtros del casco y Gorina, el enlace directo a un barrio, la ficha, la apertura del protocolo LP-B01 y el diseño a 390 px de ancho. Se verificaron muestras de interacción; no se revisaron individualmente los 522 documentos externos.
 
-La carga del fondo de calles del IGN no pudo verificarse en el entorno de prueba: el servicio devolvió HTTP 503. Las geometrías, los listados y las fichas siguen funcionando y muestran un aviso cuando el fondo falla. Es necesario comprobar este servicio desde la publicación definitiva. La publicación en GitHub aún está pendiente.
+La publicación en GitHub Pages se completó el 31/10/2026. En la dirección pública se comprobaron la carga de las 24 delegaciones y 522 barrios, la búsqueda de LP-B01, su ficha y la apertura del protocolo de La Loma. El fondo de calles usa OpenStreetMap; su disponibilidad depende de ese servicio externo. Las geometrías, los listados y las fichas siguen funcionando y muestran un aviso cuando el fondo falla.
 
 ## Fuentes y componentes
 
 - Datos y protocolos de referencia: &lt;https://riesgolaplata.org/&gt;. No se les asigna una licencia nueva.
 - Leaflet 1.9.4: &lt;https://leafletjs.com/download.html&gt;. Licencia BSD-2-Clause incluida en `docs/vendor/leaflet/LICENSE`.
-- Mapa base: IGN Argenmap, versión gris. Servicio libre y gratuito descrito por el IGN: &lt;https://www.ign.gob.ar/AreaServicios/Argenmap/introduccion&gt;.
-- Integración del mapa base: &lt;https://www.ign.gob.ar/NuestrasActividades/InformacionGeoespacial/ServiciosOGC/Leaflet&gt;.
+- Mapa base: OpenStreetMap. Atribución visible y servicio utilizado conforme a su política: &lt;https://operations.osmfoundation.org/policies/tiles/&gt;.
 
-El código y las capas se sirven desde GitHub Pages. El mapa de calles requiere el servicio del IGN y sus datos de base OpenStreetMap. El visor informa si no se pueden cargar las imágenes de fondo; la consulta de polígonos y listados sigue disponible.
+El código y las capas se sirven desde GitHub Pages. El mapa de calles requiere OpenStreetMap y los protocolos de referencia requieren `riesgolaplata.org`. El visor solicita únicamente las teselas de la vista actual, respeta la caché del navegador y no incorpora descarga masiva ni modo sin conexión. El visor informa si no se pueden cargar las imágenes de fondo; la consulta de polígonos y listados sigue disponible.
 </pre></body></html>
