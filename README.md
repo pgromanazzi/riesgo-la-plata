@@ -6,7 +6,7 @@ Aplicación estática preparada para la cuenta `pgromanazzi` y GitHub Pages. Per
 
 **Publicado:** <https://pgromanazzi.github.io/riesgo-la-plata/>. Código fuente: <https://github.com/pgromanazzi/riesgo-la-plata>. GitHub Pages sirve la carpeta `docs/` de la rama `main` con HTTPS.
 
-El código es una implementación nueva. Incluye las **24 delegaciones y 522 barrios del sitio de referencia**, recuperados el 31/10/2026. Las geometrías y los textos de las fichas se conservan; los datos **no son la nueva actualización de 2026**. Su procedencia y estado se informan en «Datos de esta versión», dentro de la ayuda, y la fecha de recuperación figura al pie del listado.
+El código es una implementación nueva. Incluye las **24 delegaciones y 522 barrios del sitio de referencia**, recuperados el 31/10/2026. Las geometrías y los textos de las fichas se conservan; los datos **no son la nueva actualización de 2026**. Su procedencia, estado y fecha de recuperación se informan en «Datos de esta versión», dentro de la ayuda.
 
 Los 522 protocolos están vinculados al servidor `riesgolaplata.org`, no incluidos en este repositorio. Se ha comprobado la apertura de una muestra, no de todos los archivos. Al recibir los protocolos actualizados, se podrán alojar en `docs/protocolos/` y modificar `protocolos_base` a `protocolos/` para dejar de depender de ese servidor.
 
@@ -14,11 +14,19 @@ Los 522 protocolos están vinculados al servidor `riesgolaplata.org`, no incluid
 
 ## Etapa, versión y fecha de publicación
 
-La franja inferior a la cabecera muestra **Etapa III del Programa de Reducción del Riesgo por Inundaciones · 31/10/2026 - 3.01**. El distintivo superior muestra **Versión 3.01**.
+La franja inferior a la cabecera muestra **Etapa III del Programa de Reducción del Riesgo por Inundaciones · Actualizado al 31/10/2026 - v. 3.02**. El distintivo superior muestra **Versión 3.02**.
 
 En cada actualización publicada de esta etapa, incrementar `version` siguiendo la secuencia **3.0 → 3.01 → 3.02 → 3.03**, y registrar en `fecha_version` la fecha efectiva de publicación en Argentina con formato **dd/mm/aaaa**. Mantener `version` como texto para conservar el cero de 3.01. Estos valores se editan en `docs/config.json`; la interfaz compone la leyenda automáticamente. Actualizar también el texto inicial de `docs/index.html` y la revisión del módulo para evitar mostrar la versión anterior durante la carga.
 
 `edicion` identifica la etapa del programa. `fecha_version` identifica la publicación del visor; `fecha_datos`, `aviso` y `data/procedencia.json` documentan por separado la procedencia y vigencia de las capas y protocolos.
+
+El pie izquierdo muestra `institucion` junto a `edicion`, y en la línea siguiente «Responsable:» seguido de `autor`.
+
+## Encuadre del mapa
+
+El inicio, la recarga del navegador y «Ver todo» centran el conjunto de delegaciones con un margen mínimo de 24 píxeles. El zoom máximo de la vista general es `zoom` en `config.json` (11). Se permiten pasos de un cuarto de nivel para aprovechar el área disponible sin recortar el partido en pantallas pequeñas. Al centrar el partido se calcula el ancho en píxeles correspondiente a una escala gráfica de 5 km; al acercar o alejar, Leaflet recalcula normalmente la distancia indicada. La escala siempre representa la distancia real de la vista.
+
+Al abrir un enlace compartido se respeta el barrio o delegación indicado. Una recarga vuelve a la vista general y limpia esa selección de la dirección. «Ajustar mapa a la selección» conserva el encuadre específico cuando se está consultando un barrio o una delegación.
 
 ## Publicación y actualizaciones en GitHub Pages
 

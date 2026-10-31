@@ -2,7 +2,7 @@ import { buildIndex, searchIndex, idOf, protocolUrl, selectionHash } from './dat
 
 const $ = id => document.getElementById(id);
 const state = { delegation: '', neighborhood: '', query: '', config: null, index: null };
-let map, delegationLayer, neighborhoodLayer, allBounds, baseLayer, toastTimer;
+let map, delegationLayer, neighborhoodLayer, allBounds, baseLayer, scaleControl, toastTimer;
 const delegationLayers = new Map(), neighborhoodLayers = new Map();
 const styles = {
   delegation: { color: '#004389', weight: 1.4, fillColor: '#0074bd', fillOpacity: .15 },
@@ -48,7 +48,22 @@ function fit(bounds) {
 }
 
 function fitSelection() {
-  fit(neighborhoodLayers.get(state.neighborhood)?.getBounds() || delegationLayers.get(state.delegation)?.getBounds() || allBounds);
+  const bounds = neighborhoodLayers.get(state.neighborhood)?.getBounds() || delegationLayers.get(state.delegation)?.getBounds();
+  if (bounds) fit(bounds);
+  else fitPartido();
+}
+
+function fitPartido() {
+  if (!allBounds?.isValid()) return;
+  // Fractional zoom avoids jumping a whole level out when the outline almost fits.
+  // Symmetric padding keeps the complete partido centered, including on small screens.
+  map.fitBounds(allBounds, { padding: [24, 24], maxZoom: state.config.zoom, animate: false });
+  // Size the metric bar to a real 5 km at this view, also on narrow screens.
+  // Leaflet continues recalculating its distance normally when the user zooms.
+  const middle = map.getSize().y / 2;
+  const metersPer100Pixels = map.distance(map.containerPointToLatLng([0, middle]), map.containerPointToLatLng([100, middle]));
+  scaleControl.options.maxWidth = Math.ceil(5000 / metersPer100Pixels * 100) + 1;
+  scaleControl.remove().addTo(map);
 }
 
 function writeHash() {
@@ -262,10 +277,10 @@ async function start() {
   $('site-title').textContent = config.titulo;
   $('site-subtitle').textContent = config.subtitulo;
   $('edition').textContent = `Versión ${config.version}`;
-  $('data-notice').textContent = `${config.edicion} del ${config.subtitulo} · ${config.fecha_version} - ${config.version}`;
+  $('data-notice').textContent = `${config.edicion} del ${config.subtitulo} · Actualizado al ${config.fecha_version} - v. ${config.version}`;
   $('data-notice').hidden = false;
-  $('author').textContent = config.autor;
-  $('data-date').textContent = config.fecha_datos;
+  $('organization').textContent = `${config.institucion} - ${config.edicion}`;
+  $('author').textContent = `Responsable: ${config.autor}`;
   $('help-source').textContent = `${config.aviso || config.edicion}. ${config.fecha_datos}. Los archivos de protocolo se muestran sin modificar su contenido.`;
   const source = new URL(config.fuente, document.baseURI);
   if (source.protocol === 'https:') $('source-link').href = source.href;
@@ -277,9 +292,9 @@ async function start() {
   }
   $('delegation-select').disabled = false;
   if (!window.L) throw new Error('No se pudo cargar Leaflet. Verificá la carpeta vendor/leaflet.');
-  map = L.map('map', { zoomControl: false, doubleClickZoom: false, scrollWheelZoom: true }).setView(config.centro, config.zoom);
+  map = L.map('map', { zoomControl: false, doubleClickZoom: false, scrollWheelZoom: true, zoomSnap: .25 });
   L.control.zoom({ position: 'topright', zoomInTitle: 'Acercar', zoomOutTitle: 'Alejar' }).addTo(map);
-  L.control.scale({ position: 'bottomright', imperial: false, maxWidth: 100 }).addTo(map);
+  scaleControl = L.control.scale({ position: 'bottomright', imperial: false, maxWidth: 100 }).addTo(map);
   baseLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     minZoom: 3, maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(map);
@@ -316,7 +331,11 @@ async function start() {
   }).addTo(map);
   allBounds = delegationLayer.getBounds();
   setupEvents();
-  applyHash();
+  // A refresh returns to the partido; a shared link still opens its barrio on arrival.
+  if (performance.getEntriesByType('navigation')[0]?.type === 'reload') {
+    history.replaceState(null, '', location.pathname + location.search);
+    selectDelegation('', { hash: false });
+  } else applyHash();
   $('search').disabled = false;
 }
 
