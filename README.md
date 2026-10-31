@@ -115,6 +115,9 @@ La publicación en GitHub Pages se completó el 31/10/2026. En la dirección pú
 
 - Datos y protocolos de referencia: <https://riesgolaplata.org/>. No se les asigna una licencia nueva.
 - Leaflet 1.9.4: <https://leafletjs.com/download.html>. Licencia BSD-2-Clause incluida en `docs/vendor/leaflet/LICENSE`.
+- Identidad municipal: manual institucional reducido de julio de 2024 y pack de logos proporcionados por el responsable del sitio. Se conserva sin modificaciones el PNG horizontal `03_MLPC_horizontal.png`, alojado como `docs/assets/marca/la-plata-capital-horizontal.png`.
+- Paleta de la interfaz: celeste principal `#00AEC3`, tono oscuro `#00585E` para controles y azules secundarios `#0099FF`, `#0066FF` y `#003DCC` para distinguir los barrios. El logo mantiene sus colores y proporciones originales sobre fondo blanco. Los colores cartográficos no representan niveles de peligrosidad.
+- Tipografía de interfaz: Roboto, indicada en el manual. Archivo WOFF2 servido localmente, obtenido del proyecto oficial <https://github.com/google/fonts/tree/main/ofl/roboto>. Licencia SIL Open Font License incluida en `docs/vendor/roboto/OFL.txt`.
 - Mapa base: OpenStreetMap. Atribución visible y servicio utilizado conforme a su política: <https://operations.osmfoundation.org/policies/tiles/>.
 
 El código y las capas se sirven desde GitHub Pages. El mapa de calles requiere OpenStreetMap y los protocolos de referencia requieren `riesgolaplata.org`. El visor solicita únicamente las teselas de la vista actual, respeta la caché del navegador y no incorpora descarga masiva ni modo sin conexión. El visor informa si no se pueden cargar las imágenes de fondo; la consulta de polígonos y listados sigue disponible.

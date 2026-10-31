@@ -5,11 +5,11 @@ const state = { delegation: '', neighborhood: '', query: '', config: null, index
 let map, delegationLayer, neighborhoodLayer, allBounds, baseLayer, toastTimer;
 const delegationLayers = new Map(), neighborhoodLayers = new Map();
 const styles = {
-  delegation: { color: '#33756b', weight: 1.4, fillColor: '#8ebda8', fillOpacity: .17 },
-  delegationSelected: { color: '#245e53', weight: 2.8, fillColor: '#b5d4b4', fillOpacity: .1 },
-  delegationMuted: { color: '#64877d', weight: 1, fillColor: '#a0baa8', fillOpacity: .06 },
-  neighborhood: { color: '#bd674b', weight: 1.25, fillColor: '#d9a273', fillOpacity: .23 },
-  neighborhoodSelected: { color: '#863c2f', weight: 2.8, fillColor: '#cd7c4f', fillOpacity: .4 }
+  delegation: { color: '#00585e', weight: 1.4, fillColor: '#00aec3', fillOpacity: .15 },
+  delegationSelected: { color: '#00585e', weight: 2.8, fillColor: '#00aec3', fillOpacity: .1 },
+  delegationMuted: { color: '#838383', weight: 1, fillColor: '#00aec3', fillOpacity: .04 },
+  neighborhood: { color: '#0066ff', weight: 1.25, fillColor: '#0099ff', fillOpacity: .14 },
+  neighborhoodSelected: { color: '#003dcc', weight: 2.8, fillColor: '#0066ff', fillOpacity: .24 }
 };
 
 function text(tag, value, className = '') {
