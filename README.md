@@ -115,8 +115,8 @@ La publicación en GitHub Pages se completó el 31/10/2026. En la dirección pú
 
 - Datos y protocolos de referencia: <https://riesgolaplata.org/>. No se les asigna una licencia nueva.
 - Leaflet 1.9.4: <https://leafletjs.com/download.html>. Licencia BSD-2-Clause incluida en `docs/vendor/leaflet/LICENSE`.
-- Identidad municipal: manual institucional reducido de julio de 2024 y pack de logos proporcionados por el responsable del sitio. Se conserva sin modificaciones el PNG horizontal `03_MLPC_horizontal.png`, alojado como `docs/assets/marca/la-plata-capital-horizontal.png`.
-- Paleta de la interfaz: celeste principal `#00AEC3`, tono oscuro `#00585E` para controles y azules secundarios `#0099FF`, `#0066FF` y `#003DCC` para distinguir los barrios. El logo mantiene sus colores y proporciones originales sobre fondo blanco. Los colores cartográficos no representan niveles de peligrosidad.
+- Identidad municipal: logo blanco `logo_muni_LP_blanco.png` proporcionado por el responsable del sitio, conservado sin modificaciones en `docs/assets/marca/municipalidad-la-plata-blanco.png` y mostrado directamente sobre el fondo azul. El favicon conserva la variante a color de la marca.
+- Paleta de la interfaz: azul `#0074BD` y azul institucional `#004389`, obtenidos de la hoja de estilos de <https://met.laplata.gob.ar/pub> el 31/10/2026. La cabecera reproduce su degradado de 100 grados entre ambos tonos; «Ver protocolo» usa `#0074BD` y cambia a `#004389` al pasar el cursor, como los botones de Alerta Temprana. Los colores cartográficos no representan niveles de peligrosidad.
 - Tipografía de interfaz: Roboto, indicada en el manual. Archivo WOFF2 servido localmente, obtenido del proyecto oficial <https://github.com/google/fonts/tree/main/ofl/roboto>. Licencia SIL Open Font License incluida en `docs/vendor/roboto/OFL.txt`.
 - Mapa base: OpenStreetMap. Atribución visible y servicio utilizado conforme a su política: <https://operations.osmfoundation.org/policies/tiles/>.
 

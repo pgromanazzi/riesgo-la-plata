@@ -5,9 +5,9 @@ const state = { delegation: '', neighborhood: '', query: '', config: null, index
 let map, delegationLayer, neighborhoodLayer, allBounds, baseLayer, toastTimer;
 const delegationLayers = new Map(), neighborhoodLayers = new Map();
 const styles = {
-  delegation: { color: '#00585e', weight: 1.4, fillColor: '#00aec3', fillOpacity: .15 },
-  delegationSelected: { color: '#00585e', weight: 2.8, fillColor: '#00aec3', fillOpacity: .1 },
-  delegationMuted: { color: '#838383', weight: 1, fillColor: '#00aec3', fillOpacity: .04 },
+  delegation: { color: '#004389', weight: 1.4, fillColor: '#0074bd', fillOpacity: .15 },
+  delegationSelected: { color: '#004389', weight: 2.8, fillColor: '#0074bd', fillOpacity: .1 },
+  delegationMuted: { color: '#838383', weight: 1, fillColor: '#0074bd', fillOpacity: .04 },
   neighborhood: { color: '#0066ff', weight: 1.25, fillColor: '#0099ff', fillOpacity: .14 },
   neighborhoodSelected: { color: '#003dcc', weight: 2.8, fillColor: '#0066ff', fillOpacity: .24 }
 };
