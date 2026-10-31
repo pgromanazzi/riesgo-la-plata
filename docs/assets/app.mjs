@@ -261,9 +261,9 @@ async function start() {
   document.title = config.titulo;
   $('site-title').textContent = config.titulo;
   $('site-subtitle').textContent = config.subtitulo;
-  $('edition').textContent = config.edicion;
-  $('data-notice').textContent = config.aviso;
-  $('data-notice').hidden = !config.aviso;
+  $('edition').textContent = `Versión ${config.version}`;
+  $('data-notice').textContent = `${config.edicion} del ${config.subtitulo} · ${config.fecha_version} - ${config.version}`;
+  $('data-notice').hidden = false;
   $('author').textContent = config.autor;
   $('data-date').textContent = config.fecha_datos;
   $('help-source').textContent = `${config.aviso || config.edicion}. ${config.fecha_datos}. Los archivos de protocolo se muestran sin modificar su contenido.`;

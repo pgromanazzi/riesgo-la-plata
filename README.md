@@ -6,11 +6,19 @@ Aplicación estática preparada para la cuenta `pgromanazzi` y GitHub Pages. Per
 
 **Publicado:** <https://pgromanazzi.github.io/riesgo-la-plata/>. Código fuente: <https://github.com/pgromanazzi/riesgo-la-plata>. GitHub Pages sirve la carpeta `docs/` de la rama `main` con HTTPS.
 
-El código es una implementación nueva. Incluye las **24 delegaciones y 522 barrios del sitio de referencia**, recuperados el 31/10/2026. Las geometrías y los textos de las fichas se conservan; los datos **no son la nueva actualización de 2026**. La etiqueta visible permite reconocer esta situación.
+El código es una implementación nueva. Incluye las **24 delegaciones y 522 barrios del sitio de referencia**, recuperados el 31/10/2026. Las geometrías y los textos de las fichas se conservan; los datos **no son la nueva actualización de 2026**. Su procedencia y estado se informan en «Datos de esta versión», dentro de la ayuda, y la fecha de recuperación figura al pie del listado.
 
 Los 522 protocolos están vinculados al servidor `riesgolaplata.org`, no incluidos en este repositorio. Se ha comprobado la apertura de una muestra, no de todos los archivos. Al recibir los protocolos actualizados, se podrán alojar en `docs/protocolos/` y modificar `protocolos_base` a `protocolos/` para dejar de depender de ese servidor.
 
 **No hay monitoreo en tiempo real ni cálculo de rutas.** El visor presenta la información existente en las capas y archivos vinculados.
+
+## Etapa, versión y fecha de publicación
+
+La franja inferior a la cabecera muestra **Etapa III del Programa de Reducción del Riesgo por Inundaciones · 31/10/2026 - 3.0**. El distintivo superior muestra **Versión 3.0**.
+
+En cada actualización publicada de esta etapa, incrementar `version` siguiendo la secuencia **3.0 → 3.01 → 3.02 → 3.03**, y registrar en `fecha_version` la fecha efectiva de publicación en Argentina con formato **dd/mm/aaaa**. Mantener `version` como texto para conservar el cero de 3.01. Estos valores se editan en `docs/config.json`; la interfaz compone la leyenda automáticamente. Actualizar también el texto inicial de `docs/index.html` y la revisión del módulo para evitar mostrar la versión anterior durante la carga.
+
+`edicion` identifica la etapa del programa. `fecha_version` identifica la publicación del visor; `fecha_datos`, `aviso` y `data/procedencia.json` documentan por separado la procedencia y vigencia de las capas y protocolos.
 
 ## Publicación y actualizaciones en GitHub Pages
 
@@ -44,7 +52,7 @@ Abrir `http://localhost:8000`. Se requiere conexión para el mapa base y los pro
 | `docs/assets/app.mjs` | Navegación, mapa, fichas y protocolos |
 | `docs/assets/data.mjs` | Validación, búsqueda y relaciones por identificador |
 | `docs/assets/styles.css` | Diseño adaptable a computadora y celular |
-| `docs/config.json` | Título, edición, aviso, procedencia y rutas de capas/protocolos |
+| `docs/config.json` | Título, etapa, versión, fecha de publicación, estado de los datos y rutas de capas/protocolos |
 | `docs/data/delegaciones.geojson` | Polígonos e identificadores de las delegaciones |
 | `docs/data/barrios.geojson` | Polígonos, códigos, nombres, delegación y protocolo de cada barrio |
 | `docs/data/procedencia.json` | Fuente, fecha de recuperación y ajustes de los datos de referencia |
@@ -89,7 +97,7 @@ La revisión de límites 2026 exige actualizar `delegacion_id` en los barrios: c
 1. Copiar los archivos en `docs/protocolos/`.
 2. En `config.json`, usar `"protocolos_base": "protocolos/"`.
 3. En cada barrio, completar `"protocolo": "LP-B01.pdf"` con el nombre exacto correspondiente. GitHub distingue mayúsculas de minúsculas.
-4. Actualizar `edicion`, `aviso`, `fecha_datos`, `fuente` y `data/procedencia.json` cuando se incorporen las capas definitivas.
+4. Actualizar `aviso`, `fecha_datos`, `fuente` y `data/procedencia.json` cuando se incorporen las capas definitivas; incrementar `version` y registrar `fecha_version` en cada publicación según la secuencia de la Etapa III.
 5. Ejecutar el validador y comprobar en el navegador barrios de distintas delegaciones.
 
 ## Verificación
