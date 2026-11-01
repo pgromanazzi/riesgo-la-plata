@@ -14,7 +14,7 @@ Los 522 protocolos están vinculados al servidor `riesgolaplata.org`, no incluid
 
 ## Etapa, versión y fecha de publicación
 
-La franja inferior a la cabecera muestra **Etapa III del Programa de Reducción del Riesgo por Inundaciones · Actualizado al 31/10/2026 - v. 3.02**. El distintivo superior muestra **Versión 3.02**.
+La franja inferior a la cabecera muestra **Etapa III del Programa de Reducción del Riesgo por Inundaciones · Actualizado al 31/10/2026 - v. 3.03**. El distintivo superior muestra **Versión 3.03**.
 
 En cada actualización publicada de esta etapa, incrementar `version` siguiendo la secuencia **3.0 → 3.01 → 3.02 → 3.03**, y registrar en `fecha_version` la fecha efectiva de publicación en Argentina con formato **dd/mm/aaaa**. Mantener `version` como texto para conservar el cero de 3.01. Estos valores se editan en `docs/config.json`; la interfaz compone la leyenda automáticamente. Actualizar también el texto inicial de `docs/index.html` y la revisión del módulo para evitar mostrar la versión anterior durante la carga.
 
@@ -27,6 +27,17 @@ El pie izquierdo muestra `institucion` junto a `edicion`, y en la línea siguien
 El inicio, la recarga del navegador y «Ver todo» centran el conjunto de delegaciones con un margen mínimo de 24 píxeles. El zoom máximo de la vista general es `zoom` en `config.json` (11). Se permiten pasos de un cuarto de nivel para aprovechar el área disponible sin recortar el partido en pantallas pequeñas. Al centrar el partido se calcula el ancho en píxeles correspondiente a una escala gráfica de 5 km; al acercar o alejar, Leaflet recalcula normalmente la distancia indicada. La escala siempre representa la distancia real de la vista.
 
 Al abrir un enlace compartido se respeta el barrio o delegación indicado. Una recarga vuelve a la vista general y limpia esa selección de la dirección. «Ajustar mapa a la selección» conserva el encuadre específico cuando se está consultando un barrio o una delegación.
+
+## Fondos del mapa
+
+El selector «Fondo del mapa», en la esquina inferior izquierda del mapa, ofrece:
+
+- **Calles · OpenStreetMap:** cartografía de calles y lugares.
+- **Satélite · Sentinel-2:** mosaico EOxCloudless de **2025**, con resolución de **10 metros**. Usa el servicio público WMTS de EOX, sin clave de API ni cuenta adicional. Al ampliar por encima del nivel nativo 14, se amplía la imagen existente; no se obtiene más detalle ni una fecha más reciente.
+
+El fondo inicial se define con `mapa_base` (`osm` o `satellite`) en `docs/config.json`. La elección del visitante se recuerda en su navegador y tiene prioridad sobre ese valor. Cambiar de fondo conserva el encuadre, la selección y la visibilidad de las capas. Los contornos se aclaran sobre la imagen para que puedan distinguirse. Si falla la carga del mosaico, el visor vuelve a OpenStreetMap y avisa al visitante.
+
+Fuente y condiciones del mosaico: [EOxCloudless — uso no comercial](https://cloudless.eox.at/license-non-commercial), [características del producto](https://cloudless.eox.at/products/viewing) y [EOX::Maps](https://maps.eox.at/). Se usa como fondo del visor público sin fines comerciales, bajo **CC BY-NC-SA 4.0**, con los enlaces y la atribución completa visibles cuando se muestra. El cambio de fondo no modifica ni actualiza las capas territoriales o los protocolos.
 
 ## Publicación y actualizaciones en GitHub Pages
 
@@ -134,6 +145,6 @@ La publicación en GitHub Pages se completó el 31/10/2026. En la dirección pú
 - Identidad municipal: logo blanco `logo_muni_LP_blanco.png` proporcionado por el responsable del sitio, conservado sin modificaciones en `docs/assets/marca/municipalidad-la-plata-blanco.png` y mostrado directamente sobre el fondo azul. El favicon conserva la variante a color de la marca.
 - Paleta de la interfaz: azul `#0074BD` y azul institucional `#004389`, obtenidos de la hoja de estilos de <https://met.laplata.gob.ar/pub> el 31/10/2026. La cabecera reproduce su degradado de 100 grados entre ambos tonos; «Ver protocolo» usa `#0074BD` y cambia a `#004389` al pasar el cursor, como los botones de Alerta Temprana. Los colores cartográficos no representan niveles de peligrosidad.
 - Tipografía de interfaz: Roboto, indicada en el manual. Archivo WOFF2 servido localmente, obtenido del proyecto oficial <https://github.com/google/fonts/tree/main/ofl/roboto>. Licencia SIL Open Font License incluida en `docs/vendor/roboto/OFL.txt`.
-- Mapa base: OpenStreetMap. Atribución visible y servicio utilizado conforme a su política: <https://operations.osmfoundation.org/policies/tiles/>.
+- Fondos: OpenStreetMap y EOxCloudless Sentinel-2 2025 (10 m). Atribución visible y servicio utilizado conforme a su política: <https://operations.osmfoundation.org/policies/tiles/>.
 
-El código y las capas se sirven desde GitHub Pages. El mapa de calles requiere OpenStreetMap y los protocolos de referencia requieren `riesgolaplata.org`. El visor solicita únicamente las teselas de la vista actual, respeta la caché del navegador y no incorpora descarga masiva ni modo sin conexión. El visor informa si no se pueden cargar las imágenes de fondo; la consulta de polígonos y listados sigue disponible.
+El código y las capas se sirven desde GitHub Pages. El mapa de calles requiere OpenStreetMap, el fondo satelital requiere `tiles.maps.eox.at` y los protocolos de referencia requieren `riesgolaplata.org`. El visor solicita únicamente las teselas de la vista actual, respeta la caché del navegador y no incorpora descarga masiva ni modo sin conexión. El visor informa si no se pueden cargar las imágenes de fondo; la consulta de polígonos y listados sigue disponible.

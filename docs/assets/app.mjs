@@ -1,9 +1,11 @@
 import { buildIndex, searchIndex, idOf, protocolUrl, selectionHash } from './data.mjs';
 
 const $ = id => document.getElementById(id);
-const state = { delegation: '', neighborhood: '', query: '', config: null, index: null };
+const state = { delegation: '', neighborhood: '', query: '', basemap: '', config: null, index: null };
 let map, delegationLayer, neighborhoodLayer, allBounds, baseLayer, scaleControl, toastTimer;
 const delegationLayers = new Map(), neighborhoodLayers = new Map();
+const baseLayers = new Map();
+const basemapPreferenceKey = 'prri-la-plata:mapa-base';
 const styles = {
   delegation: { color: '#004389', weight: 1.4, fillColor: '#0074bd', fillOpacity: .15 },
   delegationSelected: { color: '#004389', weight: 2.8, fillColor: '#0074bd', fillOpacity: .1 },
@@ -11,6 +13,64 @@ const styles = {
   neighborhood: { color: '#0066ff', weight: 1.25, fillColor: '#0099ff', fillOpacity: .14 },
   neighborhoodSelected: { color: '#003dcc', weight: 2.8, fillColor: '#0066ff', fillOpacity: .24 }
 };
+const satelliteStyles = {
+  delegation: { color: '#8bddff', weight: 1.6, fillColor: '#0074bd', fillOpacity: .03 },
+  delegationSelected: { color: '#ffffff', weight: 2.8, fillColor: '#0074bd', fillOpacity: .04 },
+  delegationMuted: { color: '#a3bfca', weight: 1, fillColor: '#0074bd', fillOpacity: .02 },
+  neighborhood: { color: '#47d0ff', weight: 1.5, fillColor: '#0099ff', fillOpacity: .08 },
+  neighborhoodSelected: { color: '#ffffff', weight: 2.8, fillColor: '#00b8ff', fillOpacity: .16 }
+};
+const mapStyles = () => state.basemap === 'satellite' ? satelliteStyles : styles;
+
+function selectBasemap(id, { remember = true, clearMessage = true } = {}) {
+  const next = baseLayers.get(id);
+  if (!next) return;
+  if (baseLayer) map.removeLayer(baseLayer);
+  state.basemap = id;
+  baseLayer = next;
+  $('basemap-select').value = id;
+  $('basemap-note').hidden = id !== 'satellite';
+  document.querySelector('.map-shell').dataset.basemap = id;
+  if (clearMessage) $('map-message').hidden = true;
+  baseLayer.addTo(map);
+  styleDelegations();
+  neighborhoodLayers.forEach((layer, other) => layer.setStyle(other === state.neighborhood ? mapStyles().neighborhoodSelected : mapStyles().neighborhood));
+  if (remember) {
+    try { localStorage.setItem(basemapPreferenceKey, id); } catch { /* Private browsing may disable storage. */ }
+  }
+}
+
+function setupBasemaps() {
+  baseLayers.set('osm', L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    minZoom: 3, maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }));
+  baseLayers.set('satellite', L.tileLayer('https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2025_3857/default/g/{z}/{y}/{x}.jpg', {
+    minZoom: 3, maxZoom: 19, maxNativeZoom: 14, keepBuffer: 0, updateWhenIdle: true, updateWhenZooming: false,
+    attribution: '<a href="https://cloudless.eox.at/">EOxCloudless</a> by <a href="https://eox.at/">EOX IT Services GmbH</a> (Contains modified Copernicus Sentinel data 2025) · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> · <a href="https://maps.eox.at/">EOX::Maps</a>'
+  }));
+  for (const [id, layer] of baseLayers) {
+    let tileErrors = 0;
+    layer.on('loading', () => { tileErrors = 0; });
+    layer.on('tileerror', () => {
+      if (state.basemap !== id || ++tileErrors < 4) return;
+      if (id === 'satellite') {
+        selectBasemap('osm', { remember: false, clearMessage: false });
+        toast('No se pudo cargar la imagen satelital. Se muestra OpenStreetMap; podés volver a elegir Satélite.');
+      } else {
+        $('map-message').textContent = 'El mapa base no está disponible. Las capas y los protocolos siguen accesibles.';
+        $('map-message').hidden = false;
+      }
+    });
+    layer.on('load', () => {
+      if (state.basemap === id && tileErrors === 0) $('map-message').hidden = true;
+    });
+  }
+  let selected = state.config.mapa_base || 'osm';
+  try { selected = localStorage.getItem(basemapPreferenceKey) || selected; } catch { /* Use the configured default. */ }
+  selectBasemap(baseLayers.has(selected) ? selected : 'osm', { remember: false });
+  $('basemap-select').disabled = false;
+}
 
 function text(tag, value, className = '') {
   const element = document.createElement(tag);
@@ -84,7 +144,8 @@ function updateBreadcrumb() {
 }
 
 function styleDelegations() {
-  delegationLayers.forEach((layer, id) => layer.setStyle(state.delegation ? (id === state.delegation ? styles.delegationSelected : styles.delegationMuted) : styles.delegation));
+  const palette = mapStyles();
+  delegationLayers.forEach((layer, id) => layer.setStyle(state.delegation ? (id === state.delegation ? palette.delegationSelected : palette.delegationMuted) : palette.delegation));
 }
 
 function row(feature, kind) {
@@ -173,7 +234,7 @@ function selectNeighborhood(id, { zoom = true, hash = true } = {}) {
   state.neighborhood = id;
   $('toggle-neighborhoods').checked = true;
   showLayers();
-  neighborhoodLayers.forEach((layer, other) => layer.setStyle(other === id ? styles.neighborhoodSelected : styles.neighborhood));
+  neighborhoodLayers.forEach((layer, other) => layer.setStyle(other === id ? mapStyles().neighborhoodSelected : mapStyles().neighborhood));
   neighborhoodLayers.get(id)?.bringToFront();
   $('detail-code').textContent = id;
   $('detail-name').textContent = p.nombre;
@@ -252,6 +313,7 @@ function setupEvents() {
   $('open-protocol').addEventListener('click', openProtocol);
   $('toggle-delegations').addEventListener('change', showLayers);
   $('toggle-neighborhoods').addEventListener('change', showLayers);
+  $('basemap-select').addEventListener('change', event => selectBasemap(event.target.value));
   $('help-button').addEventListener('click', () => $('help-dialog').showModal());
   $('close-help').addEventListener('click', () => $('help-dialog').close());
   $('close-protocol').addEventListener('click', () => $('protocol-dialog').close());
@@ -295,20 +357,13 @@ async function start() {
   map = L.map('map', { zoomControl: false, doubleClickZoom: false, scrollWheelZoom: true, zoomSnap: .25 });
   L.control.zoom({ position: 'topright', zoomInTitle: 'Acercar', zoomOutTitle: 'Alejar' }).addTo(map);
   scaleControl = L.control.scale({ position: 'bottomright', imperial: false, maxWidth: 100 }).addTo(map);
-  baseLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    minZoom: 3, maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-  }).addTo(map);
-  let tileErrors = 0;
-  baseLayer.on('tileerror', () => {
-    if (++tileErrors >= 4) { $('map-message').textContent = 'El mapa base no está disponible. Las capas y los protocolos siguen accesibles.'; $('map-message').hidden = false; }
-  });
-  baseLayer.on('tileload', () => { tileErrors = 0; $('map-message').hidden = true; });
+  setupBasemaps();
   map.createPane('delegations');
   map.getPane('delegations').style.zIndex = '400';
   map.createPane('neighborhoods');
   map.getPane('neighborhoods').style.zIndex = '410';
   delegationLayer = L.geoJSON(delegations, {
-    pane: 'delegations', style: styles.delegation,
+    pane: 'delegations', style: () => mapStyles().delegation,
     onEachFeature: (feature, layer) => {
       const id = idOf(feature);
       delegationLayers.set(id, layer);
@@ -319,14 +374,14 @@ async function start() {
     }
   }).addTo(map);
   neighborhoodLayer = L.geoJSON(null, {
-    pane: 'neighborhoods', style: styles.neighborhood,
+    pane: 'neighborhoods', style: () => mapStyles().neighborhood,
     onEachFeature: (feature, layer) => {
       const id = idOf(feature);
       neighborhoodLayers.set(id, layer);
       layer.bindTooltip(text('span', `${id} · ${feature.properties.nombre}`), { sticky: true });
       layer.on('click', () => selectNeighborhood(id));
       layer.on('mouseover', () => layer.setStyle({ fillOpacity: .43 }));
-      layer.on('mouseout', () => layer.setStyle(id === state.neighborhood ? styles.neighborhoodSelected : styles.neighborhood));
+      layer.on('mouseout', () => layer.setStyle(id === state.neighborhood ? mapStyles().neighborhoodSelected : mapStyles().neighborhood));
     }
   }).addTo(map);
   allBounds = delegationLayer.getBounds();
