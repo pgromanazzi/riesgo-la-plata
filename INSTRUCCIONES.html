@@ -14,9 +14,9 @@ Los 522 protocolos están vinculados al servidor `riesgolaplata.org`, no incluid
 
 ## Etapa, versión y fecha de publicación
 
-La franja inferior a la cabecera muestra **Etapa III del Programa de Reducción del Riesgo por Inundaciones · Actualizado al 31/10/2026 - v. 3.03**. El distintivo superior muestra **Versión 3.03**.
+La franja inferior a la cabecera muestra **Etapa III del Programa de Reducción del Riesgo por Inundaciones · Actualizado al 31/10/2026 - v. 3.04**. El distintivo superior muestra **Versión 3.04**.
 
-En cada actualización publicada de esta etapa, incrementar `version` siguiendo la secuencia **3.0 → 3.01 → 3.02 → 3.03**, y registrar en `fecha_version` la fecha efectiva de publicación en Argentina con formato **dd/mm/aaaa**. Mantener `version` como texto para conservar el cero de 3.01. Estos valores se editan en `docs/config.json`; la interfaz compone la leyenda automáticamente. Actualizar también el texto inicial de `docs/index.html` y la revisión del módulo para evitar mostrar la versión anterior durante la carga.
+En cada actualización publicada de esta etapa, incrementar `version` siguiendo la secuencia **3.0 → 3.01 → 3.02 → 3.03 → 3.04**, y registrar en `fecha_version` la fecha efectiva de publicación en Argentina con formato **dd/mm/aaaa**. Mantener `version` como texto para conservar el cero de 3.01. Estos valores se editan en `docs/config.json`; la interfaz compone la leyenda automáticamente. Actualizar también el texto inicial de `docs/index.html` y la revisión del módulo para evitar mostrar la versión anterior durante la carga.
 
 `edicion` identifica la etapa del programa. `fecha_version` identifica la publicación del visor; `fecha_datos`, `aviso` y `data/procedencia.json` documentan por separado la procedencia y vigencia de las capas y protocolos.
 
@@ -33,11 +33,11 @@ Al abrir un enlace compartido se respeta el barrio o delegación indicado. Una r
 El selector «Fondo del mapa», en la esquina inferior izquierda del mapa, ofrece:
 
 - **Calles · OpenStreetMap:** cartografía de calles y lugares.
-- **Satélite · Sentinel-2:** mosaico EOxCloudless de **2025**, con resolución de **10 metros**. Usa el servicio público WMTS de EOX, sin clave de API ni cuenta adicional. Al ampliar por encima del nivel nativo 14, se amplía la imagen existente; no se obtiene más detalle ni una fecha más reciente.
+- **Google Hybrid:** imagen satelital con calles y nombres, mediante una conexión XYZ directa sin clave, del tipo utilizado en QGIS. Se consulta únicamente al seleccionar este fondo. Su disponibilidad depende de Google.
 
-El fondo inicial se define con `mapa_base` (`osm` o `satellite`) en `docs/config.json`. La elección del visitante se recuerda en su navegador y tiene prioridad sobre ese valor. Cambiar de fondo conserva el encuadre, la selección y la visibilidad de las capas. Los contornos se aclaran sobre la imagen para que puedan distinguirse. Si falla la carga del mosaico, el visor vuelve a OpenStreetMap y avisa al visitante.
+El fondo inicial se define con `mapa_base` (`osm` o `google`) en `docs/config.json`. La elección del visitante se recuerda en su navegador y tiene prioridad sobre ese valor. Desde la versión 3.04, la antigua preferencia por Sentinel-2 se migra a Google Hybrid; Sentinel-2 ya no se ofrece ni se solicita. Cambiar de fondo conserva el encuadre, la selección y la visibilidad de las capas. Los contornos se aclaran sobre la imagen para que puedan distinguirse. Si falla la carga de Google Hybrid, el visor vuelve a OpenStreetMap y avisa al visitante.
 
-Fuente y condiciones del mosaico: [EOxCloudless — uso no comercial](https://cloudless.eox.at/license-non-commercial), [características del producto](https://cloudless.eox.at/products/viewing) y [EOX::Maps](https://maps.eox.at/). Se usa como fondo del visor público sin fines comerciales, bajo **CC BY-NC-SA 4.0**, con los enlaces y la atribución completa visibles cuando se muestra. El cambio de fondo no modifica ni actualiza las capas territoriales o los protocolos.
+La conexión XYZ de Google no es la API oficial autenticada de Google Maps Platform ni una licencia de cartografía abierta; que una URL responda no sustituye las condiciones del proveedor. Se mantiene la atribución visible y un enlace a los [términos de Google Maps](https://www.google.com/intl/es/help/terms_maps/). Referencias: [conexiones XYZ en la documentación de QGIS](https://docs.qgis.org/3.44/en/docs/user_manual/managing_data_source/opening_data.html#using-xyz-tile-services) y [Map Tiles API oficial](https://developers.google.com/maps/documentation/tile/overview). No se configura facturación ni se utiliza una clave ajena.
 
 ## Publicación y actualizaciones en GitHub Pages
 
@@ -138,6 +138,8 @@ El 31/10/2026 pasaron los ocho ensayos automáticos y el control de los 546 pol�
 
 La publicación en GitHub Pages se completó el 31/10/2026. En la dirección pública se comprobaron la carga de las 24 delegaciones y 522 barrios, la búsqueda de LP-B01, su ficha y la apertura del protocolo de La Loma. El fondo de calles usa OpenStreetMap; su disponibilidad depende de ese servicio externo. Las geometrías, los listados y las fichas siguen funcionando y muestran un aviso cuando el fondo falla.
 
+En la versión 3.04 se comprobó la carga de Google Hybrid sin clave mediante XYZ, el cambio de fondo manteniendo la selección de LP-B01, la vista móvil a 390 px sin desbordamiento horizontal y el regreso automático a OpenStreetMap ante un fallo simulado del fondo de Google. Los ocho ensayos y el validador de capas continuaron pasando.
+
 ## Fuentes y componentes
 
 - Datos y protocolos de referencia: &lt;https://riesgolaplata.org/&gt;. No se les asigna una licencia nueva.
@@ -145,7 +147,7 @@ La publicación en GitHub Pages se completó el 31/10/2026. En la dirección pú
 - Identidad municipal: logo blanco `logo_muni_LP_blanco.png` proporcionado por el responsable del sitio, conservado sin modificaciones en `docs/assets/marca/municipalidad-la-plata-blanco.png` y mostrado directamente sobre el fondo azul. El favicon conserva la variante a color de la marca.
 - Paleta de la interfaz: azul `#0074BD` y azul institucional `#004389`, obtenidos de la hoja de estilos de &lt;https://met.laplata.gob.ar/pub&gt; el 31/10/2026. La cabecera reproduce su degradado de 100 grados entre ambos tonos; «Ver protocolo» usa `#0074BD` y cambia a `#004389` al pasar el cursor, como los botones de Alerta Temprana. Los colores cartográficos no representan niveles de peligrosidad.
 - Tipografía de interfaz: Roboto, indicada en el manual. Archivo WOFF2 servido localmente, obtenido del proyecto oficial &lt;https://github.com/google/fonts/tree/main/ofl/roboto&gt;. Licencia SIL Open Font License incluida en `docs/vendor/roboto/OFL.txt`.
-- Fondos: OpenStreetMap y EOxCloudless Sentinel-2 2025 (10 m). Atribución visible y servicio utilizado conforme a su política: &lt;https://operations.osmfoundation.org/policies/tiles/&gt;.
+- Fondos: OpenStreetMap y Google Hybrid. Se muestra la atribución del fondo elegido. Política de teselas de OpenStreetMap: &lt;https://operations.osmfoundation.org/policies/tiles/&gt;.
 
-El código y las capas se sirven desde GitHub Pages. El mapa de calles requiere OpenStreetMap, el fondo satelital requiere `tiles.maps.eox.at` y los protocolos de referencia requieren `riesgolaplata.org`. El visor solicita únicamente las teselas de la vista actual, respeta la caché del navegador y no incorpora descarga masiva ni modo sin conexión. El visor informa si no se pueden cargar las imágenes de fondo; la consulta de polígonos y listados sigue disponible.
+El código y las capas se sirven desde GitHub Pages. El mapa de calles requiere OpenStreetMap, Google Hybrid requiere `mt1.google.com` y los protocolos de referencia requieren `riesgolaplata.org`. El visor solicita únicamente las teselas de la vista actual, respeta la caché del navegador y no incorpora descarga masiva ni modo sin conexión. El visor informa si no se pueden cargar las imágenes de fondo; la consulta de polígonos y listados sigue disponible.
 </pre></body></html>

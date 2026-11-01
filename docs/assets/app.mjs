@@ -20,7 +20,7 @@ const satelliteStyles = {
   neighborhood: { color: '#47d0ff', weight: 1.5, fillColor: '#0099ff', fillOpacity: .08 },
   neighborhoodSelected: { color: '#ffffff', weight: 2.8, fillColor: '#00b8ff', fillOpacity: .16 }
 };
-const mapStyles = () => state.basemap === 'satellite' ? satelliteStyles : styles;
+const mapStyles = () => state.basemap === 'google' ? satelliteStyles : styles;
 
 function selectBasemap(id, { remember = true, clearMessage = true } = {}) {
   const next = baseLayers.get(id);
@@ -29,7 +29,6 @@ function selectBasemap(id, { remember = true, clearMessage = true } = {}) {
   state.basemap = id;
   baseLayer = next;
   $('basemap-select').value = id;
-  $('basemap-note').hidden = id !== 'satellite';
   document.querySelector('.map-shell').dataset.basemap = id;
   if (clearMessage) $('map-message').hidden = true;
   baseLayer.addTo(map);
@@ -45,18 +44,20 @@ function setupBasemaps() {
     minZoom: 3, maxZoom: 19,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   }));
-  baseLayers.set('satellite', L.tileLayer('https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2025_3857/default/g/{z}/{y}/{x}.jpg', {
-    minZoom: 3, maxZoom: 19, maxNativeZoom: 14, keepBuffer: 0, updateWhenIdle: true, updateWhenZooming: false,
-    attribution: '<a href="https://cloudless.eox.at/">EOxCloudless</a> by <a href="https://eox.at/">EOX IT Services GmbH</a> (Contains modified Copernicus Sentinel data 2025) · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> · <a href="https://maps.eox.at/">EOX::Maps</a>'
+  // Direct XYZ connection, like QGIS. Availability is controlled by Google;
+  // this is not the authenticated Google Maps Platform Map Tiles API.
+  baseLayers.set('google', L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=es', {
+    minZoom: 3, maxZoom: 19, keepBuffer: 0, updateWhenIdle: true, updateWhenZooming: false,
+    attribution: '&copy; <a href="https://maps.google.com/">Google Maps</a> · <a href="https://www.google.com/intl/es/help/terms_maps/">Términos de uso</a>'
   }));
   for (const [id, layer] of baseLayers) {
     let tileErrors = 0;
     layer.on('loading', () => { tileErrors = 0; });
     layer.on('tileerror', () => {
       if (state.basemap !== id || ++tileErrors < 4) return;
-      if (id === 'satellite') {
+      if (id === 'google') {
         selectBasemap('osm', { remember: false, clearMessage: false });
-        toast('No se pudo cargar la imagen satelital. Se muestra OpenStreetMap; podés volver a elegir Satélite.');
+        toast('No se pudo cargar Google Hybrid. Se muestra OpenStreetMap; podés volver a elegir otro fondo.');
       } else {
         $('map-message').textContent = 'El mapa base no está disponible. Las capas y los protocolos siguen accesibles.';
         $('map-message').hidden = false;
@@ -68,7 +69,10 @@ function setupBasemaps() {
   }
   let selected = state.config.mapa_base || 'osm';
   try { selected = localStorage.getItem(basemapPreferenceKey) || selected; } catch { /* Use the configured default. */ }
-  selectBasemap(baseLayers.has(selected) ? selected : 'osm', { remember: false });
+  // Preserve the imagery preference for visitors upgrading from version 3.03.
+  const migrateSatellite = selected === 'satellite';
+  if (migrateSatellite) selected = 'google';
+  selectBasemap(baseLayers.has(selected) ? selected : 'osm', { remember: migrateSatellite });
   $('basemap-select').disabled = false;
 }
 
