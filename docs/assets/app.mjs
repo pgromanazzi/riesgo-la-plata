@@ -339,7 +339,7 @@ async function start() {
   const [delegations, neighborhoods] = await Promise.all([jsonFile(config.delegaciones), jsonFile(config.barrios)]);
   state.config = config;
   state.index = buildIndex(delegations, neighborhoods);
-  document.title = config.titulo;
+  document.title = config.titulo_pagina || config.titulo;
   $('site-title').textContent = config.titulo;
   $('site-subtitle').textContent = config.subtitulo;
   $('edition').textContent = `Versión ${config.version}`;

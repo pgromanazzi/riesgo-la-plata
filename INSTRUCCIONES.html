@@ -20,6 +20,8 @@ En cada actualización publicada de esta etapa, incrementar `version` siguiendo 
 
 `edicion` identifica la etapa del programa. `fecha_version` identifica la publicación del visor; `fecha_datos`, `aviso` y `data/procedencia.json` documentan por separado la procedencia y vigencia de las capas y protocolos.
 
+`titulo_pagina` define el nombre de la pestaña y el nombre sugerido al guardar el enlace en favoritos: **Protocolos Barriales . La Plata . 2026**. `titulo` mantiene el encabezado visible del visor. El título inicial de `docs/index.html` debe coincidir con `titulo_pagina`.
+
 El pie izquierdo muestra `institucion` junto a `edicion`, y en la línea siguiente «Unidad de Gestión del Riesgo», definida por `unidad` en `docs/config.json`.
 
 ## Encuadre del mapa
