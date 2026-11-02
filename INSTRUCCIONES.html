@@ -14,15 +14,15 @@ Los 522 protocolos están vinculados al servidor `riesgolaplata.org`, no incluid
 
 ## Etapa, versión y fecha de publicación
 
-La franja inferior a la cabecera muestra **Etapa III del Programa de Reducción del Riesgo por Inundaciones · Actualizado al 02/11/2026 - v. 3.05**. El distintivo superior muestra **Versión 3.05**.
+La franja inferior a la cabecera muestra **Etapa III del Programa de Reducción del Riesgo por Inundaciones · Actualizado al 02/11/2026 - v. 3.06**. El distintivo superior muestra **Versión 3.06**.
 
-En cada actualización publicada de esta etapa, incrementar `version` siguiendo la secuencia **3.0 → 3.01 → 3.02 → 3.03 → 3.04 → 3.05**, y registrar en `fecha_version` la fecha efectiva de publicación en Argentina con formato **dd/mm/aaaa**. Mantener `version` como texto para conservar el cero de 3.01. Estos valores se editan en `docs/config.json`; la interfaz compone la leyenda automáticamente. Actualizar también el texto inicial de `docs/index.html` y la revisión del módulo para evitar mostrar la versión anterior durante la carga.
+En cada actualización publicada de esta etapa, incrementar `version` siguiendo la secuencia **3.0 → 3.01 → 3.02 → 3.03 → 3.04 → 3.05 → 3.06**, y registrar en `fecha_version` la fecha efectiva de publicación en Argentina con formato **dd/mm/aaaa**. Mantener `version` como texto para conservar el cero de 3.01. Estos valores se editan en `docs/config.json`; la interfaz compone la leyenda automáticamente. Actualizar también el texto inicial de `docs/index.html` y la revisión del módulo para evitar mostrar la versión anterior durante la carga.
 
 `edicion` identifica la etapa del programa. `fecha_version` identifica la publicación del visor; `fecha_datos`, `aviso` y `data/procedencia.json` documentan por separado la procedencia y vigencia de las capas y protocolos.
 
-`titulo_pagina` define el nombre de la pestaña y el nombre sugerido al guardar el enlace en favoritos: **Protocolos Barriales . La Plata . 2026**. `titulo` mantiene el encabezado visible del visor. El título inicial de `docs/index.html` debe coincidir con `titulo_pagina`.
+`titulo_pagina` define el nombre de la pestaña y el nombre sugerido al guardar el enlace en favoritos: **Protocolos Barriales · La Plata · 2026**. `titulo` mantiene el encabezado visible del visor. El título inicial de `docs/index.html` debe coincidir con `titulo_pagina`.
 
-El pie izquierdo muestra `institucion` junto a `edicion`, y en la línea siguiente «Unidad de Gestión del Riesgo», definida por `unidad` en `docs/config.json`.
+El pie izquierdo muestra «Dirección General de Riesgo Hídrico» (`institucion`) y, en la línea siguiente, «Unidad de Gestión del Riesgo» (`unidad`). A su izquierda se presenta el logo adjunto de la unidad, conservado sin modificaciones en `docs/assets/marca/unidad-gestion-riesgo.jpg`.
 
 ## Encuadre del mapa
 

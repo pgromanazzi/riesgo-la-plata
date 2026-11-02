@@ -345,7 +345,7 @@ async function start() {
   $('edition').textContent = `Versión ${config.version}`;
   $('data-notice').textContent = `${config.edicion} del ${config.subtitulo} · Actualizado al ${config.fecha_version} - v. ${config.version}`;
   $('data-notice').hidden = false;
-  $('organization').textContent = `${config.institucion} - ${config.edicion}`;
+  $('organization').textContent = config.institucion;
   $('unit').textContent = config.unidad || 'Unidad de Gestión del Riesgo';
   $('help-source').textContent = `${config.aviso || config.edicion}. ${config.fecha_datos}. Los archivos de protocolo se muestran sin modificar su contenido.`;
   const source = new URL(config.fuente, document.baseURI);
