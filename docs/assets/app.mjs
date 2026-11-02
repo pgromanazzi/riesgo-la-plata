@@ -346,7 +346,7 @@ async function start() {
   $('data-notice').textContent = `${config.edicion} del ${config.subtitulo} · Actualizado al ${config.fecha_version} - v. ${config.version}`;
   $('data-notice').hidden = false;
   $('organization').textContent = `${config.institucion} - ${config.edicion}`;
-  $('author').textContent = `Responsable: ${config.autor}`;
+  $('unit').textContent = config.unidad || 'Unidad de Gestión del Riesgo';
   $('help-source').textContent = `${config.aviso || config.edicion}. ${config.fecha_datos}. Los archivos de protocolo se muestran sin modificar su contenido.`;
   const source = new URL(config.fuente, document.baseURI);
   if (source.protocol === 'https:') $('source-link').href = source.href;

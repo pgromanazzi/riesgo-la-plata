@@ -2,8 +2,8 @@
   "titulo": "Protocolos barriales · La Plata",
   "subtitulo": "Programa de Reducción del Riesgo por Inundaciones",
   "edicion": "Etapa III",
-  "version": "3.04",
-  "fecha_version": "31/10/2026",
+  "version": "3.05",
+  "fecha_version": "02/11/2026",
   "aviso": "Capas del sitio de referencia · Actualización 2026 pendiente",
   "fuente": "https://riesgolaplata.org/",
   "fecha_datos": "Referencia descargada el 31/10/2026",
@@ -14,5 +14,5 @@
   "zoom": 11,
   "mapa_base": "osm",
   "institucion": "Dirección General de Riesgo Hídrico - PRRI La Plata",
-  "autor": "Pablo G. Romanazzi"
+  "unidad": "Unidad de Gestión del Riesgo"
 }
