@@ -6,17 +6,17 @@ Aplicación estática preparada para la cuenta `pgromanazzi` y GitHub Pages. Per
 
 **Publicado:** <https://pgromanazzi.github.io/riesgo-la-plata/>. Código fuente: <https://github.com/pgromanazzi/riesgo-la-plata>. GitHub Pages sirve la carpeta `docs/` de la rama `main` con HTTPS.
 
-El código es una implementación nueva. Incluye las **24 delegaciones y 522 barrios del sitio de referencia**, recuperados el 31/10/2026. Las geometrías y los textos de las fichas se conservan; los datos **no son la nueva actualización de 2026**. Su procedencia, estado y fecha de recuperación se informan en «Datos de esta versión», dentro de la ayuda.
+La versión **3.07** incorpora las **23 delegaciones, 735 barrios y el límite del partido** de las capas corregidas y aprobadas el 04/11/2026. Las geometrías se reproyectaron de EPSG:5347 a EPSG:4326 sin simplificación ni nuevos ajustes. La pertenencia de los barrios corresponde a la capa aprobada. Su procedencia se documenta en `docs/data/procedencia.json`.
 
-Los 522 protocolos están vinculados al servidor `riesgolaplata.org`, no incluidos en este repositorio. Se ha comprobado la apertura de una muestra, no de todos los archivos. Al recibir los protocolos actualizados, se podrán alojar en `docs/protocolos/` y modificar `protocolos_base` a `protocolos/` para dejar de depender de ese servidor.
+Se conservan **504 enlaces a protocolos** y sus textos del servidor `riesgolaplata.org` por coincidencia exacta del código del barrio. Los **231 barrios sin coincidencia** muestran **«Protocolo en elaboración»**. Los documentos externos no están incluidos en este repositorio y su disponibilidad no se comprobó en lote. Al recibir los protocolos actualizados, se podrán alojar en `docs/protocolos/` y modificar `protocolos_base` a `protocolos/` para dejar de depender de ese servidor.
 
 **No hay monitoreo en tiempo real ni cálculo de rutas.** El visor presenta la información existente en las capas y archivos vinculados.
 
 ## Etapa, versión y fecha de publicación
 
-La franja inferior a la cabecera muestra **Etapa III del Programa de Reducción del Riesgo por Inundaciones · Actualizado al 02/11/2026 - v. 3.06**. El distintivo superior muestra **Versión 3.06**.
+La franja inferior a la cabecera muestra **Etapa III del Programa de Reducción del Riesgo por Inundaciones · Actualizado al 04/11/2026 - v. 3.07**. El distintivo superior muestra **Versión 3.07**.
 
-En cada actualización publicada de esta etapa, incrementar `version` siguiendo la secuencia **3.0 → 3.01 → 3.02 → 3.03 → 3.04 → 3.05 → 3.06**, y registrar en `fecha_version` la fecha efectiva de publicación en Argentina con formato **dd/mm/aaaa**. Mantener `version` como texto para conservar el cero de 3.01. Estos valores se editan en `docs/config.json`; la interfaz compone la leyenda automáticamente. Actualizar también el texto inicial de `docs/index.html` y la revisión del módulo para evitar mostrar la versión anterior durante la carga.
+En cada actualización publicada de esta etapa, incrementar `version` siguiendo la secuencia **3.0 → 3.01 → 3.02 → 3.03 → 3.04 → 3.05 → 3.06 → 3.07**, y registrar en `fecha_version` la fecha efectiva de publicación en Argentina con formato **dd/mm/aaaa**. Mantener `version` como texto para conservar el cero de 3.01. Estos valores se editan en `docs/config.json`; la interfaz compone la leyenda automáticamente. Actualizar también el texto inicial de `docs/index.html` y la revisión del módulo para evitar mostrar la versión anterior durante la carga.
 
 `edicion` identifica la etapa del programa. `fecha_version` identifica la publicación del visor; `fecha_datos`, `aviso` y `data/procedencia.json` documentan por separado la procedencia y vigencia de las capas y protocolos.
 
@@ -109,7 +109,7 @@ En QGIS: **Exportar → Guardar objetos como… → GeoJSON → SRC EPSG:4326**.
 | `punto_encuentro` | No | Texto de punto de encuentro del protocolo |
 | `observaciones` | No | Notas del protocolo |
 
-Los conteos y menús se generan desde las capas: no hay una lista fija de 24 delegaciones o un límite de 522 barrios. Se conserva un barrio sin protocolo, con botón deshabilitado y aviso de archivo pendiente. El vínculo territorial debe estar definido; el validador rechaza referencias inexistentes y no las asigna silenciosamente.
+Los conteos y menús se generan desde las capas, sin cantidades fijas. Un barrio sin protocolo conserva su ficha y el enlace para compartir; muestra el cartel «Protocolo en elaboración» y oculta el botón de apertura. El vínculo territorial debe estar definido; el validador rechaza referencias inexistentes y no las asigna silenciosamente.
 
 La revisión de límites 2026 exige actualizar `delegacion_id` en los barrios: cambiar solamente los polígonos de delegaciones no reasigna las pertenencias. Si un barrio cruza dos límites, se debe resolver el criterio de pertenencia antes de publicarlo. Este visor no recorta ni reasigna geometrías de forma automática.
 
@@ -132,9 +132,13 @@ node --test tests/data.test.mjs
 
 No es necesario ejecutar `npm install`. Las pruebas cubren las relaciones de la referencia, búsqueda con y sin tildes, errores de proyección/IDs, rutas de protocolos y vínculos compartidos. La comprobación de coordenadas y anillos no reemplaza un control de validez topológica, solapamientos o pertenencia territorial en SIG.
 
-Las pruebas que verifican los conteos de Gorina y casco corresponden a esta referencia; deben actualizarse al sustituir las capas por una edición nueva. No son límites de la aplicación.
+Las pruebas que verifican los conteos de Gorina (21 barrios) y casco (35 barrios) corresponden a las capas 2026; deben actualizarse al sustituir las capas por una edición nueva. No son límites de la aplicación.
 
 ### Resultado de la verificación de esta entrega
+
+La versión 3.07 superó los ocho ensayos y el validador de relaciones, códigos y coordenadas: 23 delegaciones, 735 barrios, 504 enlaces externos y 231 protocolos en elaboración. Se comprobó en una vista previa la búsqueda y la ficha pendiente de MA-B03, la búsqueda y ficha de LP-B01 y el límite del partido. Este paquete está preparado para carga manual; su publicación debe confirmarse en GitHub Pages después de subirlo.
+
+### Historial de verificaciones anteriores
 
 El 31/10/2026 pasaron los ocho ensayos automáticos y el control de los 546 polígonos (24 delegaciones y 522 barrios). Se comprobaron en navegador la búsqueda, los filtros del casco y Gorina, el enlace directo a un barrio, la ficha, la apertura del protocolo LP-B01 y el diseño a 390 px de ancho. Se verificaron muestras de interacción; no se revisaron individualmente los 522 documentos externos.
 
@@ -144,6 +148,8 @@ En la versión 3.04 se comprobó la carga de Google Hybrid sin clave mediante XY
 
 ## Fuentes y componentes
 
+- Cartografía vigente: `Barrios_2026_EPSG5347.gpkg`, `Delegaciones_2026_EPSG5347.gpkg` y `Partido_La_Plata_2026_EPSG5347.gpkg`, corregidas y aprobadas el 04/11/2026.
+
 - Datos y protocolos de referencia: <https://riesgolaplata.org/>. No se les asigna una licencia nueva.
 - Leaflet 1.9.4: <https://leafletjs.com/download.html>. Licencia BSD-2-Clause incluida en `docs/vendor/leaflet/LICENSE`.
 - Identidad municipal: logo blanco `logo_muni_LP_blanco.png` proporcionado por el responsable del sitio, conservado sin modificaciones en `docs/assets/marca/municipalidad-la-plata-blanco.png` y mostrado directamente sobre el fondo azul. El favicon conserva la variante a color de la marca.
@@ -152,3 +158,4 @@ En la versión 3.04 se comprobó la carga de Google Hybrid sin clave mediante XY
 - Fondos: OpenStreetMap y Google Hybrid. Se muestra la atribución del fondo elegido. Política de teselas de OpenStreetMap: <https://operations.osmfoundation.org/policies/tiles/>.
 
 El código y las capas se sirven desde GitHub Pages. El mapa de calles requiere OpenStreetMap, Google Hybrid requiere `mt1.google.com` y los protocolos de referencia requieren `riesgolaplata.org`. El visor solicita únicamente las teselas de la vista actual, respeta la caché del navegador y no incorpora descarga masiva ni modo sin conexión. El visor informa si no se pueden cargar las imágenes de fondo; la consulta de polígonos y listados sigue disponible.
+

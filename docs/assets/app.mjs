@@ -2,7 +2,7 @@ import { buildIndex, searchIndex, idOf, protocolUrl, selectionHash } from './dat
 
 const $ = id => document.getElementById(id);
 const state = { delegation: '', neighborhood: '', query: '', basemap: '', config: null, index: null };
-let map, delegationLayer, neighborhoodLayer, allBounds, baseLayer, scaleControl, toastTimer;
+let map, partidoLayer, delegationLayer, neighborhoodLayer, allBounds, baseLayer, scaleControl, toastTimer;
 const delegationLayers = new Map(), neighborhoodLayers = new Map();
 const baseLayers = new Map();
 const basemapPreferenceKey = 'prri-la-plata:mapa-base';
@@ -32,6 +32,7 @@ function selectBasemap(id, { remember = true, clearMessage = true } = {}) {
   document.querySelector('.map-shell').dataset.basemap = id;
   if (clearMessage) $('map-message').hidden = true;
   baseLayer.addTo(map);
+  partidoLayer?.setStyle({ color: id === 'google' ? '#ffffff' : '#173c63' });
   styleDelegations();
   neighborhoodLayers.forEach((layer, other) => layer.setStyle(other === state.neighborhood ? mapStyles().neighborhoodSelected : mapStyles().neighborhood));
   if (remember) {
@@ -246,8 +247,9 @@ function selectNeighborhood(id, { zoom = true, hash = true } = {}) {
   $('detail-basin').textContent = p.cuenca || 'Sin informar';
   const url = protocolUrl(p.protocolo, state.config.protocolos_base, document.baseURI);
   $('open-protocol').disabled = !url;
-  $('open-protocol').replaceChildren(text('span', url ? 'Ver protocolo' : 'Protocolo no disponible'), text('span', '↗'));
-  $('protocol-note').textContent = !url ? 'Este barrio todavía no tiene un archivo de protocolo vinculado.' : new URL(url).origin === location.origin ? 'Archivo incluido en este visor.' : 'Archivo enlazado al sitio de referencia.';
+  $('open-protocol').hidden = !url;
+  $('protocol-pending').hidden = !!url;
+  $('protocol-note').textContent = !url ? 'El protocolo de este barrio se publicará cuando esté disponible.' : new URL(url).origin === location.origin ? 'Archivo incluido en este visor.' : 'Archivo enlazado al sitio de referencia.';
   const details = $('recommendation-content');
   details.replaceChildren();
   for (const [key, label] of [['evitar', 'Sectores a evitar'], ['circulacion', 'Circulación recomendada'], ['punto_encuentro', 'Punto de encuentro'], ['observaciones', 'Observaciones']]) {
@@ -336,7 +338,7 @@ function setupEvents() {
 async function start() {
   if (location.protocol === 'file:') return;
   const config = await jsonFile('config.json');
-  const [delegations, neighborhoods] = await Promise.all([jsonFile(config.delegaciones), jsonFile(config.barrios)]);
+  const [delegations, neighborhoods, partido] = await Promise.all([jsonFile(config.delegaciones), jsonFile(config.barrios), jsonFile(config.partido)]);
   state.config = config;
   state.index = buildIndex(delegations, neighborhoods);
   document.title = config.titulo_pagina || config.titulo;
@@ -362,6 +364,13 @@ async function start() {
   L.control.zoom({ position: 'topright', zoomInTitle: 'Acercar', zoomOutTitle: 'Alejar' }).addTo(map);
   scaleControl = L.control.scale({ position: 'bottomright', imperial: false, maxWidth: 100 }).addTo(map);
   setupBasemaps();
+  map.createPane('partido');
+  map.getPane('partido').style.zIndex = '420';
+  map.getPane('partido').style.pointerEvents = 'none';
+  partidoLayer = L.geoJSON(partido, {
+    pane: 'partido', interactive: false,
+    style: { color: state.basemap === 'google' ? '#ffffff' : '#173c63', weight: 2.3, fill: false }
+  }).addTo(map);
   map.createPane('delegations');
   map.getPane('delegations').style.zIndex = '400';
   map.createPane('neighborhoods');
@@ -388,7 +397,7 @@ async function start() {
       layer.on('mouseout', () => layer.setStyle(id === state.neighborhood ? mapStyles().neighborhoodSelected : mapStyles().neighborhood));
     }
   }).addTo(map);
-  allBounds = delegationLayer.getBounds();
+  allBounds = partidoLayer.getBounds();
   setupEvents();
   // A refresh returns to the partido; a shared link still opens its barrio on arrival.
   if (performance.getEntriesByType('navigation')[0]?.type === 'reload') {
@@ -405,3 +414,4 @@ ready.then(start).catch(error => {
   $('totals').textContent = 'Revisá la configuración y las capas.';
   $('results-count').textContent = 'Error al cargar los datos.';
 });
+

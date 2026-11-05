@@ -13,7 +13,7 @@ test('las capas completas tienen relaciones válidas y conservan todos los barri
   assert.equal([...idx.groups.values()].reduce((n, f) => n + f.length, 0), b.features.length);
 });
 test('nombres distintos de Gorina y casco no dejan barrios fuera de la selección', () => {
-  assert.equal(idx.groups.get('D-10').length, 18);
+  assert.equal(idx.groups.get('D-10').length, 21);
   assert.equal(idx.groups.get('D-14').length, 35);
 });
 test('la búsqueda ignora tildes y mayúsculas y permite códigos', () => {
@@ -54,3 +54,4 @@ test('los enlaces compartidos conservan códigos con espacios y caracteres espec
   assert.equal(selectionHash('D-10', ''), '#delegacion=D-10');
   assert.equal(selectionHash('', ''), '');
 });
+

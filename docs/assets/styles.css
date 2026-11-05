@@ -12,3 +12,6 @@ dialog{border:1px solid #d1e0e6;border-radius:9px;padding:0;color:var(--ink);box
 .basemap-selector{padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid #dae6ea}.map-legend{width:230px}.map-legend .basemap-label{display:block;margin:0 0 8px;font-size:8px;letter-spacing:1.2px;font-weight:700;color:var(--muted)}.map-legend select{height:34px;font-size:11px;padding:0 6px}.map-shell[data-basemap="google"] .swatch.delegation{border-color:#50b8e8;background:#0074bd12}.map-shell[data-basemap="google"] .swatch.neighborhood{border-color:#26acd8;background:#0099ff14}.leaflet-control-attribution{max-width:min(850px,100%);white-space:normal;line-height:1.4!important}@media(max-width:700px){.map-legend{width:185px}.map-legend select{font-size:10px;height:31px}.basemap-selector{padding-bottom:9px;margin-bottom:9px}.leaflet-control-attribution{font-size:8px!important}}
 
 .sidebar-footer .unit-logo{display:block;width:44px;height:44px;flex:0 0 44px;object-fit:contain}.sidebar-footer .footer-copy{min-width:0}
+
+
+.protocol-pending{margin:0 0 16px;padding:14px 16px;border:1px solid #b6d7ef;border-left:4px solid #0074bd;border-radius:5px;background:#edf6fd;color:#004389;font-size:15px;font-weight:600;line-height:1.4}

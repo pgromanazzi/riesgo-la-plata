@@ -9,9 +9,9 @@
   <link rel="icon" href="assets/marca/la-plata-capital-horizontal.png" type="image/png">
   <link rel="preload" href="vendor/roboto/Roboto-Variable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
-  <link rel="stylesheet" href="assets/styles.css?v=20261102.1">
+  <link rel="stylesheet" href="assets/styles.css?v=20261104.307">
   <script src="vendor/leaflet/leaflet.js" defer></script>
-  <script type="module" src="assets/app.mjs?v=20261102.3"></script>
+  <script type="module" src="assets/app.mjs?v=20261104.307"></script>
 </head>
 <body>
   <a class="skip-link" href="#search">Ir al buscador de barrios</a>
@@ -22,9 +22,9 @@
     <a class="brand" href="./" aria-label="Protocolos barriales La Plata, inicio">
       <span><strong id="site-title">Protocolos barriales · La Plata</strong><small id="site-subtitle">Programa de Reducción del Riesgo por Inundaciones</small></span>
     </a>
-    <div class="header-actions"><span class="edition" id="edition">Versión 3.06</span><button id="help-button" class="help-button" aria-label="Cómo usar el visor">? <span>Cómo usar el visor</span></button></div>
+    <div class="header-actions"><span class="edition" id="edition">Versión 3.07</span><button id="help-button" class="help-button" aria-label="Cómo usar el visor">? <span>Cómo usar el visor</span></button></div>
   </header>
-  <div class="version-banner" id="data-notice" role="note">Etapa III del Programa de Reducción del Riesgo por Inundaciones · Actualizado al 02/11/2026 - v. 3.06</div>
+  <div class="version-banner" id="data-notice" role="note">Etapa III del Programa de Reducción del Riesgo por Inundaciones · Actualizado al 04/11/2026 - v. 3.07</div>
   <main class="workspace">
     <aside class="sidebar" aria-label="Explorar delegaciones y barrios">
       <div class="sidebar-head">
@@ -50,6 +50,7 @@
         <div class="detail-header"><span class="eyebrow">PROTOCOLO BARRIAL</span><button id="close-detail" class="icon-button" aria-label="Cerrar ficha de barrio">×</button></div>
         <span id="detail-code" class="code-badge"></span><h2 id="detail-name"></h2><p id="detail-delegation" class="detail-delegation"></p>
         <dl class="detail-facts"><div><dt>Cuenca</dt><dd id="detail-basin"></dd></div></dl>
+        <p id="protocol-pending" class="protocol-pending" role="status" hidden>Protocolo en elaboración</p>
         <div class="detail-actions"><button id="open-protocol" class="primary-button">Ver protocolo <span aria-hidden="true">↗</span></button><button id="share-button" class="secondary-button">Copiar enlace al barrio</button></div>
         <p class="protocol-note" id="protocol-note"></p>
         <details id="recommendations"><summary>Recomendaciones del protocolo</summary><dl id="recommendation-content"></dl></details>
@@ -64,7 +65,7 @@
   </dialog>
   <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
     <div class="dialog-heading"><h2 id="help-title">Cómo usar el visor</h2><button id="close-help" class="icon-button" aria-label="Cerrar ayuda">×</button></div>
-    <ol><li><strong>Cambiá el fondo.</strong> En «Fondo del mapa» elegí OpenStreetMap o Google Hybrid (imagen satelital con calles y nombres). El visor recuerda tu elección en este navegador.</li><li><strong>Elegí una delegación.</strong> Usá el listado, el selector o un clic sobre el mapa.</li><li><strong>Encontrá un barrio.</strong> Buscá por nombre, código o cuenca. Con una delegación elegida, la búsqueda se limita a ella.</li><li><strong>Consultá el protocolo.</strong> Seleccioná un barrio y presioná «Ver protocolo». Podés abrir el archivo en otra pestaña.</li><li><strong>Compartí la consulta.</strong> «Copiar enlace al barrio» conserva la selección. «Ver todo» vuelve al partido completo.</li></ol>
+    <ol><li><strong>Cambiá el fondo.</strong> En «Fondo del mapa» elegí OpenStreetMap o Google Hybrid (imagen satelital con calles y nombres). El visor recuerda tu elección en este navegador.</li><li><strong>Elegí una delegación.</strong> Usá el listado, el selector o un clic sobre el mapa.</li><li><strong>Encontrá un barrio.</strong> Buscá por nombre, código o cuenca. Con una delegación elegida, la búsqueda se limita a ella.</li><li><strong>Consultá el protocolo.</strong> Seleccioná un barrio y presioná «Ver protocolo». Podés abrir el archivo en otra pestaña. Cuando no haya un protocolo asociado al código, verás «Protocolo en elaboración».</li><li><strong>Compartí la consulta.</strong> «Copiar enlace al barrio» conserva la selección. «Ver todo» vuelve al partido completo.</li></ol>
     <div class="source-note"><strong>Datos de esta versión</strong><p id="help-source"></p><a id="source-link" target="_blank" rel="noopener noreferrer">Consultar el sitio de referencia ↗</a></div>
   </dialog>
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
@@ -72,3 +73,4 @@
   <script>if(location.protocol==='file:'){document.querySelector('#results').textContent='Para probar el visor, iniciá un servidor local según INSTRUCCIONES.html o publicalo en GitHub Pages.';}</script>
 </body>
 </html>
+
