@@ -9,9 +9,9 @@
   <link rel="icon" href="assets/marca/Logo circular azul de Gestión del Riesgo.png" type="image/png">
   <link rel="preload" href="vendor/roboto/Roboto-Variable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
-  <link rel="stylesheet" href="assets/styles.css?v=20261105.308">
+  <link rel="stylesheet" href="assets/styles.css?v=20261106.308-estetica">
   <script src="vendor/leaflet/leaflet.js" defer></script>
-  <script type="module" src="assets/app.mjs?v=20261105.308"></script>
+  <script type="module" src="assets/app.mjs?v=20261106.308-estetica"></script>
 </head>
 <body>
   <a class="skip-link" href="#search">Ir al buscador de lugares</a>
@@ -20,11 +20,10 @@
       <img src="assets/marca/municipalidad-la-plata-blanco.png" alt="Municipalidad de La Plata" width="983" height="185" fetchpriority="high">
     </a>
     <a class="brand" href="./" aria-label="Protocolos barriales La Plata, inicio">
-      <span><strong id="site-title">Protocolos barriales · La Plata</strong><small id="site-subtitle">Programa de Reducción del Riesgo por Inundaciones</small></span>
+      <span><strong id="site-title">Protocolos barriales · La Plata</strong><small id="site-subtitle"><span id="program-name"><span class="prri-initial">P</span>rograma de <span class="prri-initial">R</span>educción del <span class="prri-initial">R</span>iesgo por <span class="prri-initial">I</span>nundaciones</span> <span id="program-edition" class="program-edition">(PRRI – Etapa III)</span></small></span>
     </a>
-    <div class="header-actions"><span class="edition" id="edition">Versión 3.08</span><button id="help-button" class="help-button" aria-label="Cómo usar el visor">? <span>Cómo usar el visor</span></button></div>
+    <div class="header-actions"><div class="edition" aria-label="Versión y actualización"><span id="edition">Versión 3.08</span><small id="updated-date">Actualizado al 06/11/2026</small></div><button id="help-button" class="help-button" aria-label="Cómo usar el visor">? <span>Cómo usar el visor</span></button></div>
   </header>
-  <div class="version-banner" id="data-notice" role="note">Etapa III del Programa de Reducción del Riesgo por Inundaciones · Actualizado al 05/11/2026 - v. 3.08</div>
   <main class="workspace">
     <aside class="sidebar" aria-label="Explorar delegaciones y barrios">
       <div class="sidebar-head">
@@ -40,17 +39,12 @@
       <p id="results-count" class="sr-only" role="status" aria-live="polite"></p>
       <div id="results" class="results" aria-labelledby="results-heading"><p class="empty">Cargando datos…</p></div>
       <footer class="sidebar-footer">
-        <img class="unit-logo"
-             src="assets/marca/Logo circular azul de Gestión del Riesgo.png"
-             alt="Logo de la Unidad de Gestión del Riesgo"
-             width="192" height="192">
-
-       <div class="footer-copy">
-         <span id="organization">Dirección General de Riesgo Hídrico</span>
-         <small id="unit" hidden></small>
-         </div>
-         <p class="footer-note">(Recomendaciones para la protección ciudadana. No sustituyen la prudencia ni las medidas de autoprotección ante una emergencia.)</p>
-     </footer>
+        <div class="footer-copy">
+          <strong id="unit">Unidad de Gestión del Riesgo La Plata</strong>
+          <span id="organization">Dirección General de Riesgo Hídrico</span>
+        </div>
+        <p class="footer-note">(Recomendaciones para la protección ciudadana. No sustituyen la prudencia ni las medidas de autoprotección ante una emergencia.)</p>
+      </footer>
     </aside>
     <section class="map-shell" aria-label="Mapa de delegaciones y barrios">
       <div id="map" aria-label="Mapa interactivo de La Plata" tabindex="0"></div>
