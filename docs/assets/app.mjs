@@ -1,4 +1,4 @@
-import { buildIndex, searchIndex, idOf, protocolUrl, selectionHash, placeLabels } from './data.mjs?v=20261105.308';
+import { buildIndex, searchIndex, idOf, protocolUrl, selectionHash, resolveNeighborhoodId, placeLabels } from './data.mjs?v=20261106.309';
 
 const $ = id => document.getElementById(id);
 const state = { delegation: '', neighborhood: '', place: '', query: '', basemap: '', config: null, index: null };
@@ -268,6 +268,7 @@ function selectNeighborhood(id, { zoom = true, hash = true, keepPlace = !!state.
   $('open-protocol').hidden = !url;
   $('protocol-pending').hidden = !!url;
   $('protocol-note').textContent = !url ? 'El protocolo de este barrio se publicará cuando esté disponible.' : new URL(url).origin === location.origin ? 'Archivo incluido en este visor.' : 'Archivo enlazado al sitio de referencia.';
+  if (url && p.codigo_protocolo_referencia) $('protocol-note').textContent += ` El documento conserva el código ${p.codigo_protocolo_referencia} de la numeración anterior.`;
   const details = $('recommendation-content');
   details.replaceChildren();
   for (const [key, label] of [['evitar', 'Sectores a evitar'], ['circulacion', 'Circulación recomendada'], ['punto_encuentro', 'Punto de encuentro'], ['observaciones', 'Observaciones']]) {
@@ -368,7 +369,8 @@ function selectPlace(id, { zoom = true, hash = true } = {}) {
 
 function applyHash() {
   const params = new URLSearchParams(location.hash.slice(1));
-  const b = params.get('barrio'), d = params.get('delegacion'), p = params.get('lugar');
+  const requested = params.get('barrio');
+  const b = resolveNeighborhoodId(params, state.index), d = params.get('delegacion'), p = params.get('lugar');
   if (p && state.index.byP.has(p)) {
     selectPlace(p, { hash: false });
     if (b && state.index.byP.get(p).properties.barrio_ids.includes(b)) selectNeighborhood(b, { hash: false, keepPlace: true });
@@ -376,8 +378,9 @@ function applyHash() {
   else if (d && state.index.byD.has(d)) selectDelegation(d, { hash: false });
   else {
     selectDelegation('', { hash: false });
-    if (b || d || p) toast('La selección del enlace no existe en las capas cargadas.');
+    if (requested || d || p) toast('La selección del enlace no existe en las capas cargadas.');
   }
+  if (requested && b && requested !== b && state.neighborhood === b) toast(`Numeración actualizada: ${requested} ahora es ${b}.`);
 }
 
 function openProtocol() {
@@ -388,6 +391,7 @@ function openProtocol() {
   $('protocol-title').textContent = `${p.id} · ${p.nombre}`;
   $('protocol-external').href = url;
   $('protocol-origin').textContent = new URL(url).origin === location.origin ? 'Archivo del visor' : 'Documento del sitio de referencia';
+  if (p.codigo_protocolo_referencia) $('protocol-origin').textContent += ` · Código anterior: ${p.codigo_protocolo_referencia}`;
   const body = $('protocol-body');
   body.replaceChildren();
   if (/\.pdf$/i.test(new URL(url).pathname)) {

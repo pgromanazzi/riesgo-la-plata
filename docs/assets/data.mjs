@@ -148,5 +148,20 @@ export function selectionHash(delegationId, neighborhoodId, placeId = '') {
   if (placeId) params.set('lugar', placeId);
   if (neighborhoodId) params.set('barrio', neighborhoodId);
   else if (delegationId) params.set('delegacion', delegationId);
+  // Los códigos LO-B03 a LO-B28 existen en las dos numeraciones.
+  // La edición en enlaces nuevos permite conservar los enlaces anteriores.
+  if (/^LO-B\d{2}$/.test(neighborhoodId)) params.set('numeracion', '20261106');
   return params.size ? '#' + params.toString() : '';
+}
+
+export function resolveNeighborhoodId(params, index) {
+  const id = params.get('barrio');
+  if (!id) return null;
+  if (!params.has('numeracion')) {
+    const previous = index.bList.find(f => f.properties.codigo_anterior === id);
+    if (previous) return idOf(previous);
+  } else if (/^LO-B\d{2}$/.test(id) && params.get('numeracion') !== '20261106') {
+    return null;
+  }
+  return id;
 }
