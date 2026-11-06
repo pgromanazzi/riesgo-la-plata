@@ -25,30 +25,36 @@ dialog{border:1px solid #d1e0e6;border-radius:9px;padding:0;color:var(--ink);box
 .sidebar-footer {
   display: block;
   text-align: left;
+  flex-shrink: 0;
+  background: linear-gradient(100deg, var(--brand), var(--brand-deep));
+  color: #fff;
+  border-top: 1px solid #ffffff30;
+  padding-block: 20px;
 }
 .sidebar-footer .footer-copy {
   display: grid;
-  gap: 5px;
+  gap: 7px;
 }
 .sidebar-footer #unit {
   display: block;
   margin: 0;
-  color: #000;
-  font-size: 13px;
+  color: #fff;
+  font-size: 16px;
   font-weight: 800;
   line-height: 1.35;
 }
 .sidebar-footer #organization {
-  font-size: 12px;
-  font-weight: 800;
-  line-height: 1.3;
-  color: #004389;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #fff;
 }
 .sidebar-footer .footer-note {
   margin: 12px 0 0;
-  font-size: 10px;
-  line-height: 1.45;
-  color: #334155;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.55;
+  color: #fff;
 }
 
 /* Programa y actualización en el encabezado */

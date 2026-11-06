@@ -3,7 +3,7 @@
   "titulo_pagina": "Protocolos Barriales · La Plata · 2026",
   "subtitulo": "Programa de Reducción del Riesgo por Inundaciones",
   "edicion": "Etapa III",
-  "version": "3.09",
+  "version": "3.10",
   "fecha_version": "06/11/2026",
   "aviso": "Cartografía 2026 corregida y aprobada",
   "fuente": "https://riesgolaplata.org/",
@@ -18,7 +18,7 @@
   "zoom": 11,
   "mapa_base": "osm",
   "institucion": "Dirección General de Riesgo Hídrico",
-  "unidad": "Unidad de Gestión del Riesgo La Plata",
+  "unidad": "Unidad de Gestión de Riesgo",
   "partido": "data/partido.geojson",
   "lugares": "data/lugares.geojson"
 }

@@ -452,7 +452,7 @@ function setupEvents() {
 function renderInstitutionalLayout(config) {
   // Reconcilia también el HTML anterior que pueda conservar el navegador.
   const stylesheet = document.querySelector('link[href*="assets/styles.css"]');
-  const stylesheetUrl = new URL('assets/styles.css?v=20261106.308-r2', document.baseURI).href;
+  const stylesheetUrl = new URL('assets/styles.css?v=20261106.310', document.baseURI).href;
   if (stylesheet && stylesheet.href !== stylesheetUrl) stylesheet.href = stylesheetUrl;
   document.querySelectorAll('.version-banner, #data-notice').forEach(element => element.remove());
   document.querySelectorAll('.sidebar-footer .unit-logo').forEach(element => element.remove());
@@ -481,7 +481,7 @@ function renderInstitutionalLayout(config) {
   updated.id = 'updated-date';
   editionBox.replaceChildren(edition, updated);
 
-  const unit = text('strong', config.unidad || 'Unidad de Gestión del Riesgo La Plata');
+  const unit = text('strong', config.unidad || 'Unidad de Gestión de Riesgo');
   unit.id = 'unit';
   const organization = text('span', config.institucion);
   organization.id = 'organization';
