@@ -15,3 +15,25 @@ dialog{border:1px solid #d1e0e6;border-radius:9px;padding:0;color:var(--ink);box
 
 
 .protocol-pending{margin:0 0 16px;padding:14px 16px;border:1px solid #b6d7ef;border-left:4px solid #0074bd;border-radius:5px;background:#edf6fd;color:#004389;font-size:15px;font-weight:600;line-height:1.4}
+/* Logo más grande en el zócalo */
+.sidebar-footer .unit-logo {
+  width: 96px;
+  height: 96px;
+  flex: 0 0 96px;
+  object-fit: contain;
+}
+
+/* Texto alineado abajo */
+.sidebar-footer .footer-copy {
+  align-self: flex-end;
+}
+
+/* Dirección General en negrita */
+.sidebar-footer #organization {
+  font-weight: 700;
+}
+
+/* Ocultar la línea adicional */
+.sidebar-footer #unit {
+  display: none;
+}
