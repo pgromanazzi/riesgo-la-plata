@@ -194,5 +194,28 @@
     ],
     "geometria_cuencas": "Las 11 geometrías coinciden topológicamente con la intersección del GeoPackage original y el límite municipal en EPSG:4326. Ninguna geometría web tiene porción exterior en ese CRS.",
     "transformacion": "Todas las coordenadas se transformaron a EPSG:3857 mediante GDAL y se contrastaron con las ecuaciones de Mercator esférico de Leaflet. La comprobación verifica la conversión numérica, no la precisión posicional de los datos de origen."
-  }
+  },
+  "asignacion_barrios": {
+    "fecha": "2026-11-06",
+    "version_visor": "3.12",
+    "barrios": 735,
+    "cuencas": 11,
+    "cantidad_barrios_segun_numero_de_cuencas": {
+      "1": 566,
+      "2": 159,
+      "3": 10
+    },
+    "metodo": "Intersección del polígono completo de cada barrio con las 11 cuencas recortadas al partido, en EPSG:5347. Se incluyen todas las intersecciones con superficie superior a 0,0001 m², sin umbral porcentual. Contactos de línea o punto no asignan cuenca.",
+    "sha256_barrios_origen": "e980c2e49c54953d2e1126fb925403ac59185fb5cfe3b4df83a6b2c012e8db2a",
+    "sha256_cuencas": "796ea87680f8b28fec42f0ede686de4cbf2c5303c3f413331b1ab7541a1bf2aa",
+    "sin_cuenca": []
+  },
+  "ajustes_sin_cambio_de_version": [
+    "Comentario del zócalo sin paréntesis y en cursiva.",
+    "Referencia de proyección reducida a título y EPSG.",
+    "Escala gráfica de cuatro segmentos blancos y negros, recalculada con el zoom y la latitud.",
+    "Interrogación a la derecha del texto de ayuda; retirada la sección pública de datos de la versión.",
+    "Conservado OpenTopoMap.",
+    "Asignadas las cuencas a los 735 barrios por intersección de sus polígonos completos."
+  ]
 }

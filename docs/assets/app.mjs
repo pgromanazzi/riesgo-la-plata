@@ -1,5 +1,6 @@
 import { buildIndex, searchIndex, idOf, protocolUrl, selectionHash, resolveNeighborhoodId, placeLabels } from './data.mjs?v=20261106.309';
-import { basemapIds, mapPreferences, insideBasin, validateBasins, layoutBasinLabels } from './cartography.mjs?v=20261106.312';
+import { basemapIds, mapPreferences, insideBasin, validateBasins, layoutBasinLabels } from './cartography.mjs?v=20261106.312a';
+import { createGraphicScale } from './map-scale.mjs?v=20261106.312a';
 
 const $ = id => document.getElementById(id);
 const state = { delegation: '', neighborhood: '', place: '', query: '', basemap: '', basins: false, overviewZoom: null, config: null, index: null };
@@ -224,7 +225,7 @@ function fitPartido() {
   // Leaflet continues recalculating its distance normally when the user zooms.
   const middle = map.getSize().y / 2;
   const metersPer100Pixels = map.distance(map.containerPointToLatLng([0, middle]), map.containerPointToLatLng([100, middle]));
-  scaleControl.options.maxWidth = Math.ceil(5000 / metersPer100Pixels * 100) + 1;
+  scaleControl.options.maxWidth = Math.max(80, Math.min(180, Math.ceil(5000 / metersPer100Pixels * 100) + 1));
   scaleControl.remove().addTo(map);
 }
 
@@ -359,7 +360,8 @@ function selectNeighborhood(id, { zoom = true, hash = true, keepPlace = !!state.
   $('detail-code').textContent = id;
   $('detail-name').textContent = p.nombre;
   $('detail-delegation').textContent = state.index.byD.get(dId).properties.nombre;
-  $('detail-basin').textContent = p.cuenca || 'Sin informar';
+  $('detail-basin-title').textContent = p.cuencas?.length > 1 ? 'Cuencas' : 'Cuenca';
+  $('detail-basin').textContent = p.cuenca || 'Sin cobertura en la cartografía de cuencas';
   const url = protocolUrl(p.protocolo, state.config.protocolos_base, document.baseURI);
   $('open-protocol').disabled = !url;
   $('open-protocol').hidden = !url;
@@ -556,7 +558,7 @@ function setupEvents() {
 function renderInstitutionalLayout(config) {
   // Reconcilia también el HTML anterior que pueda conservar el navegador.
   const stylesheet = document.querySelector('link[href*="assets/styles.css"]');
-  const stylesheetUrl = new URL('assets/styles.css?v=20261106.312', document.baseURI).href;
+  const stylesheetUrl = new URL('assets/styles.css?v=20261106.312a', document.baseURI).href;
   if (stylesheet && stylesheet.href !== stylesheetUrl) stylesheet.href = stylesheetUrl;
   document.querySelectorAll('.version-banner, #data-notice').forEach(element => element.remove());
   document.querySelectorAll('.sidebar-footer .unit-logo').forEach(element => element.remove());
@@ -601,9 +603,6 @@ async function start() {
   state.index = buildIndex(delegations, neighborhoods, places);
   $('crs-display').textContent = config.crs_visualizacion;
   $('help-crs').textContent = `Todas las capas y los tres fondos se muestran en ${config.crs_visualizacion}. Los archivos GeoJSON utilizan ${config.crs_archivos_web}, en longitud y latitud; el visor los proyecta a EPSG:3857 al dibujarlos. Origen territorial: ${config.crs_origen_territorial}. Origen de las cuencas: ${config.crs_origen_cuencas}.`;
-  $('help-source').textContent = `${config.aviso || config.edicion}. ${config.fecha_datos}. Los archivos de protocolo se muestran sin modificar su contenido.`;
-  const source = new URL(config.fuente, document.baseURI);
-  if (source.protocol === 'https:') $('source-link').href = source.href;
   $('totals').replaceChildren(text('strong', state.index.dList.length), document.createTextNode(' delegaciones'), text('span', '  ·  '), text('strong', state.index.bList.length), document.createTextNode(' barrios'));
   for (const feature of state.index.dList) {
     const option = text('option', prettyLabel(feature.properties.nombre));
@@ -616,7 +615,7 @@ async function start() {
   // L.geoJSON reads longitude/latitude (EPSG:4326) and projects through this CRS.
   map = L.map('map', { crs: L.CRS.EPSG3857, zoomControl: false, doubleClickZoom: false, scrollWheelZoom: true, zoomSnap: .25 });
   L.control.zoom({ position: 'topright', zoomInTitle: 'Acercar', zoomOutTitle: 'Alejar' }).addTo(map);
-  scaleControl = L.control.scale({ position: 'bottomright', imperial: false, maxWidth: 100 }).addTo(map);
+  scaleControl = createGraphicScale(L, { position: 'bottomright', maxWidth: 160 }).addTo(map);
   setupBasemaps();
   map.createPane('partido');
   map.getPane('partido').style.zIndex = '420';
