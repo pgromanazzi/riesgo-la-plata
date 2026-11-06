@@ -1,0 +1,118 @@
+{
+  "fecha_preparacion": "2026-11-06",
+  "version": "3.11",
+  "fuente": "Cuencas_LaPlata_2023.gpkg",
+  "sha256_fuente": "ac9b0b086c638a8e4315f74158764dae848eaa75583b6a78a545026d7ade9967",
+  "crs_origen_cuencas": "WGS 84 / EPSG:4326",
+  "limite_recorte": "docs/data/partido.geojson — límite aprobado del Partido de La Plata",
+  "sha256_limite": "13ec61536f68783192d18d17bec3bbd58690d3b4a579a9adab1a8cb16c783982",
+  "crs_origen_limite": "POSGAR 2007 / Argentina 5 — EPSG:5347",
+  "crs_archivos_web": "WGS 84 / EPSG:4326; orden longitud, latitud",
+  "crs_visualizacion": "WGS 84 / Pseudo-Mercator — EPSG:3857",
+  "metodo": "Intersección vectorial de cada cuenca con el polígono municipal en el CRS común EPSG:4326, sin simplificación. Superficies calculadas sobre las geometrías transformadas a EPSG:5347. Se conservan las partes interiores y los nombres de origen.",
+  "etiquetas": "Punto interior próximo al polo de inaccesibilidad de la parte de mayor superficie, con alternativas interiores para evitar superposiciones visuales.",
+  "alcance": "La vista representa la porción de cada cuenca dentro del partido; no representa la cuenca hidrológica completa fuera del límite municipal.",
+  "cuencas_origen": 11,
+  "cuencas_mostradas": 11,
+  "control": [
+    {
+      "id": "CU-ABASCAY",
+      "nombre": "Arroyo Abascay",
+      "area_origen_km2": 501.9499968112751,
+      "area_recortada_km2": 215.65847849337885,
+      "area_fuera_partido_km2": 0.0,
+      "etiquetas_interiores": 21,
+      "geometria_valida": true
+    },
+    {
+      "id": "CU-CARNAVAL",
+      "nombre": "Arroyo Carnaval",
+      "area_origen_km2": 78.51345052078098,
+      "area_recortada_km2": 77.4403321603631,
+      "area_fuera_partido_km2": 0.0,
+      "etiquetas_interiores": 24,
+      "geometria_valida": true
+    },
+    {
+      "id": "CU-DULCE",
+      "nombre": "Arroyo Dulce",
+      "area_origen_km2": 488.3277492637336,
+      "area_recortada_km2": 38.81204128713543,
+      "area_fuera_partido_km2": 0.0,
+      "etiquetas_interiores": 24,
+      "geometria_valida": true
+    },
+    {
+      "id": "CU-EL-GATO",
+      "nombre": "Arroyo El Gato",
+      "area_origen_km2": 114.10111225501332,
+      "area_recortada_km2": 111.2780837675461,
+      "area_fuera_partido_km2": 0.0,
+      "etiquetas_interiores": 24,
+      "geometria_valida": true
+    },
+    {
+      "id": "CU-MALDONADO",
+      "nombre": "Arroyo Maldonado",
+      "area_origen_km2": 74.1278437989966,
+      "area_recortada_km2": 59.660824971775654,
+      "area_fuera_partido_km2": 0.0,
+      "etiquetas_interiores": 24,
+      "geometria_valida": true
+    },
+    {
+      "id": "CU-PEREYRA",
+      "nombre": "Arroyo Pereyra",
+      "area_origen_km2": 63.731616558911384,
+      "area_recortada_km2": 20.049252510998205,
+      "area_fuera_partido_km2": 0.0,
+      "etiquetas_interiores": 9,
+      "geometria_valida": true
+    },
+    {
+      "id": "CU-EL-PESCADO",
+      "nombre": "Arroyo El Pescado",
+      "area_origen_km2": 361.75348084331694,
+      "area_recortada_km2": 234.12771814394682,
+      "area_fuera_partido_km2": 0.0,
+      "etiquetas_interiores": 24,
+      "geometria_valida": true
+    },
+    {
+      "id": "CU-RODRIGUEZ",
+      "nombre": "Arroyo Rodríguez",
+      "area_origen_km2": 55.97122445317966,
+      "area_recortada_km2": 54.77068858481599,
+      "area_fuera_partido_km2": 0.0,
+      "etiquetas_interiores": 24,
+      "geometria_valida": true
+    },
+    {
+      "id": "CU-SAN-LUIS",
+      "nombre": "Arroyo San Luis",
+      "area_origen_km2": 139.77171467946937,
+      "area_recortada_km2": 23.178613360207933,
+      "area_fuera_partido_km2": 0.0,
+      "etiquetas_interiores": 24,
+      "geometria_valida": true
+    },
+    {
+      "id": "CU-SB-CHICO",
+      "nombre": "Arroyo Samborombón Chico",
+      "area_origen_km2": 519.81389230409,
+      "area_recortada_km2": 44.295043311026554,
+      "area_fuera_partido_km2": 0.0,
+      "etiquetas_interiores": 22,
+      "geometria_valida": true
+    },
+    {
+      "id": "CU-ZOOLOGICO",
+      "nombre": "Arroyo Zoológico",
+      "area_origen_km2": 11.59548504149902,
+      "area_recortada_km2": 11.157388046168208,
+      "area_fuera_partido_km2": 0.0,
+      "etiquetas_interiores": 24,
+      "geometria_valida": true
+    }
+  ]
+}

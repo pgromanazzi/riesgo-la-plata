@@ -114,3 +114,31 @@ dialog{border:1px solid #d1e0e6;border-radius:9px;padding:0;color:var(--ink);box
 .place-source summary{cursor:pointer}
 .back-to-place{display:block;background:none;border:0;padding:0;margin:0 0 16px;color:#0074bd;font-size:12px;text-align:left}
 .back-to-place[hidden]{display:none}
+
+/* Cuencas, orientación y referencia cartográfica */
+.map-north{position:absolute;z-index:510;top:16px;right:18px;width:38px;padding:5px 4px 4px;background:#ffffffed;border:1px solid #d3e1e6;border-radius:5px;box-shadow:var(--shadow);text-align:center;color:#173c63;pointer-events:none}
+.map-north span{display:block;font-size:12px;font-weight:800;line-height:1;margin-bottom:1px}
+.map-north svg{display:block;width:25px;height:34px;margin:auto}
+.leaflet-top.leaflet-right{top:90px}
+.map-actions{top:185px}
+.map-crs{position:absolute;z-index:500;right:12px;bottom:58px;max-width:290px;padding:7px 9px;border:1px solid #d3e1e6;border-radius:4px;background:#fffffff2;color:#244561;font-size:9px;font-weight:500;line-height:1.5;box-shadow:var(--shadow);pointer-events:none}
+.map-crs span{display:block}
+.basin-legend{margin-top:11px;padding-top:10px;border-top:1px solid #dae6ea}
+.basin-legend>span{display:flex;align-items:center;gap:8px;font-size:10px;line-height:1.4}
+.map-legend .basin-legend small{font-size:9px;margin-top:6px}
+.swatch.basin{border:0;border-top:2px dashed #773b91;height:0;flex:0 0 13px}
+.map-shell[data-basemap="google"] .swatch.basin{border-top-color:#a97500}
+.basin-label-anchor{border:0;background:none;pointer-events:none!important}
+.basin-label{display:block;width:max-content;max-width:136px;padding:3px 5px;border:1px solid #773b9166;border-radius:4px;background:#fffffff2;color:#622580;box-shadow:0 1px 4px #15294026;font-family:"Roboto","Segoe UI",Arial,sans-serif;font-size:12px;font-weight:700;line-height:1.2;text-align:center;white-space:normal;transform:translate(-50%,-50%);pointer-events:none}
+.map-shell[data-basemap="google"] .basin-label{background:#102d48ed;border-color:#ffe16bb3;color:#fff;box-shadow:0 1px 5px #0005}
+@media(max-width:700px){
+  .map-north{top:13px;right:12px;width:36px}
+  .leaflet-top.leaflet-right{top:84px;right:4px}
+  .map-actions{top:178px;right:14px}
+  .map-crs{right:10px;bottom:55px;max-width:calc(100% - 20px);font-size:8px;padding:5px 7px;line-height:1.4}
+  .map-legend{bottom:118px}
+  .basin-legend{margin-top:8px;padding-top:8px}
+  .basin-legend>span{font-size:9px}
+  .map-legend .basin-legend small{font-size:8px}
+  .basin-label{font-size:11px;max-width:120px;padding:2px 4px}
+}

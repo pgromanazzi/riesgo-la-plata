@@ -9,9 +9,9 @@
   <link rel="icon" href="assets/marca/Logo circular azul de Gestión del Riesgo.png" type="image/png">
   <link rel="preload" href="vendor/roboto/Roboto-Variable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
-  <link rel="stylesheet" href="assets/styles.css?v=20261106.310">
+  <link rel="stylesheet" href="assets/styles.css?v=20261106.311">
   <script src="vendor/leaflet/leaflet.js" defer></script>
-  <script type="module" src="assets/app.mjs?v=20261106.310"></script>
+  <script type="module" src="assets/app.mjs?v=20261106.311"></script>
 </head>
 <body>
   <a class="skip-link" href="#search">Ir al buscador de lugares</a>
@@ -22,7 +22,7 @@
     <a class="brand" href="./" aria-label="Protocolos barriales La Plata, inicio">
       <span><strong id="site-title">Protocolos barriales · La Plata</strong><small id="site-subtitle"><span id="program-name"><span class="prri-initial">P</span>rograma de <span class="prri-initial">R</span>educción del <span class="prri-initial">R</span>iesgo por <span class="prri-initial">I</span>nundaciones</span> <span id="program-edition" class="program-edition">(PRRI – Etapa III)</span></small></span>
     </a>
-    <div class="header-actions"><div class="edition" aria-label="Versión y actualización"><span id="edition">Versión 3.10</span><small id="updated-date">Actualizado al 06/11/2026</small></div><button id="help-button" class="help-button" aria-label="Cómo usar el visor">? <span>Cómo usar el visor</span></button></div>
+    <div class="header-actions"><div class="edition" aria-label="Versión y actualización"><span id="edition">Versión 3.11</span><small id="updated-date">Actualizado al 06/11/2026</small></div><button id="help-button" class="help-button" aria-label="Cómo usar el visor">? <span>Cómo usar el visor</span></button></div>
   </header>
   <main class="workspace">
     <aside class="sidebar" aria-label="Explorar delegaciones y barrios">
@@ -49,8 +49,12 @@
     <section class="map-shell" aria-label="Mapa de delegaciones y barrios">
       <div id="map" aria-label="Mapa interactivo de La Plata" tabindex="0"></div>
       <div class="map-breadcrumb" id="breadcrumb">PARTIDO DE LA PLATA <span>/</span> <strong>Vista general</strong></div>
+      <div class="map-north" role="img" aria-label="Norte geográfico" title="Norte geográfico; mapa orientado al norte">
+        <span aria-hidden="true">N</span><svg viewBox="0 0 32 42" aria-hidden="true"><path d="M16 2 29 38 16 30 3 38Z" fill="#fff" stroke="#173c63" stroke-width="1.5"/><path d="M16 2 16 30 3 38Z" fill="#173c63"/></svg>
+      </div>
+      <div class="map-crs" aria-label="Sistemas de referencia cartográfica"><span id="crs-territorial">Origen territorial: POSGAR 2007 / Faja 5 · EPSG:5347</span><span id="crs-basins">Cuencas 2023: WGS 84 · EPSG:4326</span><span id="crs-display">Mapa web: Web Mercator · EPSG:3857</span></div>
       <div class="map-actions"><button id="fit-button" title="Ajustar mapa a la selección" aria-label="Ajustar mapa a la selección"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6M8 12h8m-4-4v8"/></svg></button></div>
-      <div class="map-legend"><div class="basemap-selector"><label for="basemap-select" class="basemap-label">FONDO DEL MAPA</label><select id="basemap-select" disabled><option value="osm">Calles · OpenStreetMap</option><option value="google">Google Hybrid</option></select></div><span class="legend-title">CAPAS DEL MAPA</span><label><input id="toggle-delegations" type="checkbox" checked><i class="swatch delegation"></i>Delegaciones</label><label><input id="toggle-neighborhoods" type="checkbox" checked><i class="swatch neighborhood"></i>Barrios</label><small>Los colores distinguen capas,<br>no niveles de peligrosidad.</small></div>
+      <div class="map-legend"><div class="basemap-selector"><label for="basemap-select" class="basemap-label">FONDO DEL MAPA</label><select id="basemap-select" disabled><option value="osm">Calles · OpenStreetMap</option><option value="google">Google Hybrid</option><option value="osm-cuencas">OpenStreetMap + cuencas</option><option value="google-cuencas">Google Hybrid + cuencas</option></select></div><span class="legend-title">CAPAS DEL MAPA</span><label><input id="toggle-delegations" type="checkbox" checked><i class="swatch delegation"></i>Delegaciones</label><label><input id="toggle-neighborhoods" type="checkbox" checked><i class="swatch neighborhood"></i>Barrios</label><div id="basin-legend" class="basin-legend" hidden><span><i class="swatch basin"></i><span id="basin-count">Cuencas · límites y nombres</span></span><small>Porción dentro del partido.<br>Acercá el mapa para leer más nombres.</small></div><small>Los colores distinguen capas,<br>no niveles de peligrosidad.</small></div>
       <article id="detail" class="detail" hidden aria-labelledby="detail-name">
         <div class="detail-header"><span class="eyebrow">PROTOCOLO BARRIAL</span><button id="close-detail" class="icon-button" aria-label="Cerrar ficha de barrio">×</button></div>
         <button id="back-to-place" class="back-to-place" type="button" hidden>← Volver al lugar</button>
@@ -80,7 +84,7 @@
   </dialog>
   <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
     <div class="dialog-heading"><h2 id="help-title">Cómo usar el visor</h2><button id="close-help" class="icon-button" aria-label="Cerrar ayuda">×</button></div>
-    <ol><li><strong>Cambiá el fondo.</strong> En «Fondo del mapa» elegí OpenStreetMap o Google Hybrid (imagen satelital con calles y nombres). El visor recuerda tu elección en este navegador.</li><li><strong>Elegí una delegación.</strong> Usá el listado, el selector o un clic sobre el mapa.</li><li><strong>Buscá un lugar.</strong> Usá el mismo buscador para barrios, delegaciones, escuelas, centros de salud y urbanizaciones informales. Podés escribir un nombre, número de escuela, CAPS o código de urbanización. Con una delegación elegida, la búsqueda se limita a ella; «Ver todo» permite buscar en todo el partido.</li><li><strong>Ubicá el establecimiento.</strong> Al elegir un resultado, el visor muestra un punto o un área sobre cualquiera de los fondos. Su ficha permite seleccionar el barrio y consultar el protocolo. Una urbanización puede intersectar varios barrios. Los lugares con «Ubicación por verificar» no muestran un punto hasta confirmar sus coordenadas.</li><li><strong>Consultá el protocolo.</strong> Seleccioná un barrio y presioná «Ver protocolo». Podés abrir el archivo en otra pestaña. Cuando no haya un protocolo asociado al código, verás «Protocolo en elaboración».</li><li><strong>Compartí la consulta.</strong> «Copiar enlace al barrio» conserva la selección. «Ver todo» vuelve al partido completo.</li></ol>
+    <ol><li><strong>Cambiá el fondo.</strong> En «Fondo del mapa» elegí OpenStreetMap, Google Hybrid, OpenStreetMap + cuencas o Google Hybrid + cuencas. Las dos opciones con cuencas muestran sus límites y nombres, recortados al partido. Los nombres se distribuyen para evitar superposiciones; acercá el mapa cuando necesites más detalle. El visor recuerda la combinación elegida. El norte está arriba a la derecha y los sistemas de referencia, al pie derecho.</li><li><strong>Elegí una delegación.</strong> Usá el listado, el selector o un clic sobre el mapa.</li><li><strong>Buscá un lugar.</strong> Usá el mismo buscador para barrios, delegaciones, escuelas, centros de salud y urbanizaciones informales. Podés escribir un nombre, número de escuela, CAPS o código de urbanización. Con una delegación elegida, la búsqueda se limita a ella; «Ver todo» permite buscar en todo el partido.</li><li><strong>Ubicá el establecimiento.</strong> Al elegir un resultado, el visor muestra un punto o un área sobre cualquiera de los fondos. Su ficha permite seleccionar el barrio y consultar el protocolo. Una urbanización puede intersectar varios barrios. Los lugares con «Ubicación por verificar» no muestran un punto hasta confirmar sus coordenadas.</li><li><strong>Consultá el protocolo.</strong> Seleccioná un barrio y presioná «Ver protocolo». Podés abrir el archivo en otra pestaña. Cuando no haya un protocolo asociado al código, verás «Protocolo en elaboración».</li><li><strong>Compartí la consulta.</strong> «Copiar enlace al barrio» conserva la selección. «Ver todo» vuelve al partido completo.</li></ol>
     <div class="source-note"><strong>Datos de esta versión</strong><p id="help-source"></p><a id="source-link" target="_blank" rel="noopener noreferrer">Consultar el sitio de referencia ↗</a></div>
   </dialog>
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>

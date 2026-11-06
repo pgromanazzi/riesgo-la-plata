@@ -1,8 +1,11 @@
 import { buildIndex, searchIndex, idOf, protocolUrl, selectionHash, resolveNeighborhoodId, placeLabels } from './data.mjs?v=20261106.309';
+import { mapViews, mapView, fallbackView, insideBasin, validateBasins, layoutBasinLabels } from './cartography.mjs?v=20261106.311';
 
 const $ = id => document.getElementById(id);
 const state = { delegation: '', neighborhood: '', place: '', query: '', basemap: '', config: null, index: null };
 let map, partidoLayer, delegationLayer, neighborhoodLayer, placeLayer, allBounds, baseLayer, scaleControl, toastTimer;
+let basinLayer, basinOutline, basinHalo, basinNames, basinLabelFrame;
+const basinLabels = [];
 const delegationLayers = new Map(), neighborhoodLayers = new Map();
 const baseLayers = new Map();
 const basemapPreferenceKey = 'prri-la-plata:mapa-base';
@@ -20,21 +23,24 @@ const satelliteStyles = {
   neighborhood: { color: '#47d0ff', weight: 1.5, fillColor: '#0099ff', fillOpacity: .08 },
   neighborhoodSelected: { color: '#ffffff', weight: 2.8, fillColor: '#00b8ff', fillOpacity: .16 }
 };
-const mapStyles = () => state.basemap === 'google' ? satelliteStyles : styles;
+const mapStyles = () => mapView(state.basemap).base === 'google' ? satelliteStyles : styles;
 
 function selectBasemap(id, { remember = true, clearMessage = true } = {}) {
-  const next = baseLayers.get(id);
+  if (!Object.hasOwn(mapViews, id)) return;
+  const view = mapView(id);
+  const next = baseLayers.get(view.base);
   if (!next) return;
-  if (baseLayer) map.removeLayer(baseLayer);
+  if (baseLayer && baseLayer !== next) map.removeLayer(baseLayer);
   state.basemap = id;
   baseLayer = next;
   $('basemap-select').value = id;
-  document.querySelector('.map-shell').dataset.basemap = id;
+  document.querySelector('.map-shell').dataset.basemap = view.base;
   if (clearMessage) $('map-message').hidden = true;
-  baseLayer.addTo(map);
-  partidoLayer?.setStyle({ color: id === 'google' ? '#ffffff' : '#173c63' });
+  if (!map.hasLayer(baseLayer)) baseLayer.addTo(map);
+  partidoLayer?.setStyle({ color: view.base === 'google' ? '#ffffff' : '#173c63' });
   styleDelegations();
   neighborhoodLayers.forEach((layer, other) => layer.setStyle(other === state.neighborhood ? mapStyles().neighborhoodSelected : mapStyles().neighborhood));
+  syncBasins();
   if (remember) {
     try { localStorage.setItem(basemapPreferenceKey, id); } catch { /* Private browsing may disable storage. */ }
   }
@@ -55,9 +61,9 @@ function setupBasemaps() {
     let tileErrors = 0;
     layer.on('loading', () => { tileErrors = 0; });
     layer.on('tileerror', () => {
-      if (state.basemap !== id || ++tileErrors < 4) return;
+      if (mapView(state.basemap).base !== id || ++tileErrors < 4) return;
       if (id === 'google') {
-        selectBasemap('osm', { remember: false, clearMessage: false });
+        selectBasemap(fallbackView(state.basemap), { remember: false, clearMessage: false });
         toast('No se pudo cargar Google Hybrid. Se muestra OpenStreetMap; podés volver a elegir otro fondo.');
       } else {
         $('map-message').textContent = 'El mapa base no está disponible. Las capas y los protocolos siguen accesibles.';
@@ -65,7 +71,7 @@ function setupBasemaps() {
       }
     });
     layer.on('load', () => {
-      if (state.basemap === id && tileErrors === 0) $('map-message').hidden = true;
+      if (mapView(state.basemap).base === id && tileErrors === 0) $('map-message').hidden = true;
     });
   }
   let selected = state.config.mapa_base || 'osm';
@@ -73,8 +79,85 @@ function setupBasemaps() {
   // Preserve the imagery preference for visitors upgrading from version 3.03.
   const migrateSatellite = selected === 'satellite';
   if (migrateSatellite) selected = 'google';
-  selectBasemap(baseLayers.has(selected) ? selected : 'osm', { remember: migrateSatellite });
+  selectBasemap(Object.hasOwn(mapViews, selected) ? selected : 'osm', { remember: migrateSatellite });
   $('basemap-select').disabled = false;
+}
+
+function queueBasinLabels() {
+  cancelAnimationFrame(basinLabelFrame);
+  basinLabelFrame = requestAnimationFrame(positionBasinLabels);
+}
+
+function syncBasins() {
+  const active = mapView(state.basemap).basins;
+  document.querySelector('.map-shell').dataset.cuencas = String(active);
+  $('basin-legend').hidden = !active;
+  if (!basinLayer) return;
+  const satellite = mapView(state.basemap).base === 'google';
+  basinHalo.setStyle({ color: satellite ? '#142b43' : '#fff', weight: satellite ? 4.8 : 4.6, opacity: .9 });
+  basinOutline.setStyle({ color: satellite ? '#ffe16b' : '#773b91', weight: 2.1, opacity: 1, dashArray: '7 4' });
+  if (active && !map.hasLayer(basinLayer)) basinLayer.addTo(map);
+  if (!active && map.hasLayer(basinLayer)) map.removeLayer(basinLayer);
+  queueBasinLabels();
+}
+
+function setupBasins(cuencas) {
+  const errors = validateBasins(cuencas);
+  if (errors.length) throw new Error(errors.join(' '));
+  map.createPane('basins');
+  map.getPane('basins').style.zIndex = '415';
+  map.getPane('basins').style.pointerEvents = 'none';
+  map.createPane('basinNames');
+  map.getPane('basinNames').style.zIndex = '440';
+  map.getPane('basinNames').style.pointerEvents = 'none';
+  const options = { pane: 'basins', interactive: false, style: { fill: false, lineCap: 'round', lineJoin: 'round' } };
+  basinHalo = L.geoJSON(cuencas, options);
+  basinOutline = L.geoJSON(cuencas, options);
+  basinNames = L.layerGroup();
+  for (const feature of cuencas.features) {
+    const p = feature.properties;
+    const label = text('span', p.nombre_corto || p.nombre, 'basin-label');
+    label.setAttribute('aria-label', `Cuenca del ${p.nombre}`);
+    label.title = `Cuenca del ${p.nombre} · porción dentro del partido`;
+    const marker = L.marker([p.etiqueta[1], p.etiqueta[0]], {
+      pane: 'basinNames', interactive: false, keyboard: false,
+      icon: L.divIcon({ className: 'basin-label-anchor', html: label, iconSize: [0, 0], iconAnchor: [0, 0] })
+    }).addTo(basinNames);
+    basinLabels.push({ feature, marker, label });
+  }
+  basinLayer = L.layerGroup([basinHalo, basinOutline, basinNames]);
+  $('basin-count').textContent = `${cuencas.features.length} cuencas · límites y nombres`;
+  map.on('moveend zoomend resize', queueBasinLabels);
+  syncBasins();
+}
+
+function positionBasinLabels() {
+  if (!basinLayer || !map.hasLayer(basinLayer) || !map.getZoom()) return;
+  const size = map.getSize(), rect = map.getContainer().getBoundingClientRect();
+  const obstacles = [...document.querySelectorAll('.map-legend,.map-crs,.map-north,.map-breadcrumb,.map-actions,.leaflet-control-zoom,.leaflet-control-attribution,.leaflet-control-scale,#detail,#place-detail')]
+    .filter(el => el.getClientRects().length && !el.hidden)
+    .map(el => { const r = el.getBoundingClientRect(); return { left: r.left - rect.left, right: r.right - rect.left, top: r.top - rect.top, bottom: r.bottom - rect.top }; });
+  const samples = [];
+  for (let i = 1; i <= 7; i++) for (let j = 1; j <= 7; j++) {
+    const x = size.x * i / 8, y = size.y * j / 8, latlng = map.containerPointToLatLng([x, y]);
+    samples.push({ coordinate: [latlng.lng, latlng.lat], screen: [x, y], latlng, distance: Math.hypot(x - size.x / 2, y - size.y / 2) });
+  }
+  samples.sort((a, b) => a.distance - b.distance);
+  const items = basinLabels.map(({ feature, label }) => {
+    const p = feature.properties;
+    const candidates = p.etiquetas_alternativas.map(coordinate => {
+      const latlng = L.latLng(coordinate[1], coordinate[0]), screen = map.latLngToContainerPoint(latlng);
+      return { latlng, screen: [screen.x, screen.y] };
+    });
+    candidates.push(...samples.filter(c => insideBasin(c.coordinate, feature.geometry)));
+    return { id: p.id, area: p.superficie_en_partido_km2, width: label.offsetWidth, height: label.offsetHeight, candidates };
+  });
+  const placed = new Map(layoutBasinLabels(items, size, obstacles).map(item => [item.id, item]));
+  for (const { feature, label, marker } of basinLabels) {
+    const item = placed.get(feature.properties.id);
+    label.style.visibility = item ? 'visible' : 'hidden';
+    if (item) marker.setLatLng(item.candidate.latlng);
+  }
 }
 
 function text(tag, value, className = '') {
@@ -240,6 +323,7 @@ function selectDelegation(id, { zoom = true, hash = true, clearQuery = true } = 
   updateBreadcrumb();
   if (zoom) fitSelection();
   if (hash) writeHash();
+  queueBasinLabels();
 }
 
 function selectNeighborhood(id, { zoom = true, hash = true, keepPlace = !!state.place } = {}) {
@@ -283,6 +367,7 @@ function selectNeighborhood(id, { zoom = true, hash = true, keepPlace = !!state.
     document.querySelector('.map-shell').scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
   }
   if (hash) writeHash();
+  queueBasinLabels();
 }
 
 function clearPlace() {
@@ -365,6 +450,7 @@ function selectPlace(id, { zoom = true, hash = true } = {}) {
   if (zoom) { if (feature.geometry) fit(placeLayer.getBounds()); else fitPartido(); }
   if (zoom && matchMedia('(max-width: 700px)').matches) document.querySelector('.map-shell').scrollIntoView({ block: 'start', behavior: 'smooth' });
   if (hash) writeHash();
+  queueBasinLabels();
 }
 
 function applyHash() {
@@ -452,7 +538,7 @@ function setupEvents() {
 function renderInstitutionalLayout(config) {
   // Reconcilia también el HTML anterior que pueda conservar el navegador.
   const stylesheet = document.querySelector('link[href*="assets/styles.css"]');
-  const stylesheetUrl = new URL('assets/styles.css?v=20261106.310', document.baseURI).href;
+  const stylesheetUrl = new URL('assets/styles.css?v=20261106.311', document.baseURI).href;
   if (stylesheet && stylesheet.href !== stylesheetUrl) stylesheet.href = stylesheetUrl;
   document.querySelectorAll('.version-banner, #data-notice').forEach(element => element.remove());
   document.querySelectorAll('.sidebar-footer .unit-logo').forEach(element => element.remove());
@@ -492,9 +578,12 @@ async function start() {
   if (location.protocol === 'file:') return;
   const config = await jsonFile('config.json');
   renderInstitutionalLayout(config);
-  const [delegations, neighborhoods, partido, places] = await Promise.all([jsonFile(config.delegaciones), jsonFile(config.barrios), jsonFile(config.partido), config.lugares ? jsonFile(config.lugares) : { type: 'FeatureCollection', features: [] }]);
+  const [delegations, neighborhoods, partido, places, cuencas] = await Promise.all([jsonFile(config.delegaciones), jsonFile(config.barrios), jsonFile(config.partido), config.lugares ? jsonFile(config.lugares) : { type: 'FeatureCollection', features: [] }, jsonFile(config.cuencas)]);
   state.config = config;
   state.index = buildIndex(delegations, neighborhoods, places);
+  $('crs-territorial').textContent = `Origen territorial: ${config.crs_origen_territorial}`;
+  $('crs-basins').textContent = `Cuencas 2023: ${config.crs_origen_cuencas}`;
+  $('crs-display').textContent = `Mapa web: ${config.crs_visualizacion}`;
   $('help-source').textContent = `${config.aviso || config.edicion}. ${config.fecha_datos}. Los archivos de protocolo se muestran sin modificar su contenido.`;
   const source = new URL(config.fuente, document.baseURI);
   if (source.protocol === 'https:') $('source-link').href = source.href;
@@ -515,7 +604,7 @@ async function start() {
   map.getPane('partido').style.pointerEvents = 'none';
   partidoLayer = L.geoJSON(partido, {
     pane: 'partido', interactive: false,
-    style: { color: state.basemap === 'google' ? '#ffffff' : '#173c63', weight: 2.3, fill: false }
+    style: { color: mapView(state.basemap).base === 'google' ? '#ffffff' : '#173c63', weight: 2.3, fill: false }
   }).addTo(map);
   map.createPane('delegations');
   map.getPane('delegations').style.zIndex = '400';
@@ -560,12 +649,14 @@ async function start() {
     }
   }).addTo(map);
   allBounds = partidoLayer.getBounds();
+  setupBasins(cuencas);
   setupEvents();
   // A refresh returns to the partido; a shared link still opens its barrio on arrival.
   if (performance.getEntriesByType('navigation')[0]?.type === 'reload') {
     history.replaceState(null, '', location.pathname + location.search);
     selectDelegation('', { hash: false });
   } else applyHash();
+  queueBasinLabels();
   $('search').disabled = false;
 }
 
