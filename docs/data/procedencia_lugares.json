@@ -1,0 +1,31 @@
+{
+  "fecha_preparacion": "05/11/2026",
+  "fuentes": [
+    "Establecimientos educativos.zip",
+    "Urbanizaciones informales.zip",
+    "MAPA LA PLATA - SECRETARIA SALUD (5).pdf"
+  ],
+  "conteos": {
+    "educacion": 658,
+    "salud": 64,
+    "urbanizacion": 128
+  },
+  "con_geometria": 837,
+  "por_verificar": 13,
+  "sin_barrio": 2,
+  "urbanizaciones_otro_partido_excluidas": {
+    "Berisso": 18,
+    "Ensenada": 17
+  },
+  "criterios": [
+    "Una sola capa educativa de 658 registros; las capas de 656 y 16255 son referencias duplicadas.",
+    "Salud: se usa la capa geográfica ES de 64 registros; E_Salud contiene un subconjunto de 14 hospitales.",
+    "CAPS con número repetido y coordenadas distintas: un resultado sin marcador hasta verificar; candidatos conservados en el control.",
+    "PDF municipal: se incorporan direcciones por número de CAPS; el PDF no contiene coordenadas georreferenciadas.",
+    "Las urbanizaciones se conservan como áreas; pueden intersectar varios barrios y delegaciones. No se asigna un protocolo único a toda el área.",
+    "No se asigna el barrio más cercano cuando la ubicación queda fuera de los polígonos aprobados.",
+    "Coordenadas: inversa Transverse Mercator de los archivos PRJ con PROJ; elipsoides WGS84/GRS80. No se aplicó corrección local de datum a POSGAR 98.",
+    "Las capas aprobadas del partido, barrios y delegaciones no se modificaron.",
+    "Las capas de seguridad, bomberos y penales se mantienen como material de origen y no forman parte de esta ampliación."
+  ]
+}

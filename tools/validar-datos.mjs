@@ -7,7 +7,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'd
 const read = relative => JSON.parse(fs.readFileSync(path.join(root, relative), 'utf8'));
 try {
   const config = read('config.json');
-  const index = buildIndex(read(config.delegaciones), read(config.barrios));
+  const index = buildIndex(read(config.delegaciones), read(config.barrios), config.lugares ? read(config.lugares) : undefined);
   const page = 'https://pgromanazzi.github.io/riesgo-la-plata/';
   let remote = 0, local = 0, missing = 0;
   const errors = [];
@@ -25,6 +25,7 @@ try {
   if (errors.length) throw new Error(errors.join('\n'));
   console.log(`OK: ${index.dList.length} delegaciones, ${index.bList.length} barrios; relaciones, IDs y coordenadas válidos.`);
   console.log(`Protocolos: ${local} locales, ${remote} externos, ${missing} sin vincular.`);
+  console.log(`Lugares: ${index.pList.length}; ${index.pList.filter(f => f.geometry).length} con geometría y ${index.pList.filter(f => !f.geometry).length} con ubicación por verificar.`);
   if (remote) console.log('Los enlaces externos se validaron sintácticamente; su disponibilidad requiere conexión y no se comprobó en lote.');
 } catch (error) {
   console.error(error.message);

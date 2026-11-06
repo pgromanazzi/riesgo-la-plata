@@ -1,8 +1,8 @@
-import { buildIndex, searchIndex, idOf, protocolUrl, selectionHash } from './data.mjs';
+import { buildIndex, searchIndex, idOf, protocolUrl, selectionHash, placeLabels } from './data.mjs?v=20261105.308';
 
 const $ = id => document.getElementById(id);
-const state = { delegation: '', neighborhood: '', query: '', basemap: '', config: null, index: null };
-let map, partidoLayer, delegationLayer, neighborhoodLayer, allBounds, baseLayer, scaleControl, toastTimer;
+const state = { delegation: '', neighborhood: '', place: '', query: '', basemap: '', config: null, index: null };
+let map, partidoLayer, delegationLayer, neighborhoodLayer, placeLayer, allBounds, baseLayer, scaleControl, toastTimer;
 const delegationLayers = new Map(), neighborhoodLayers = new Map();
 const baseLayers = new Map();
 const basemapPreferenceKey = 'prri-la-plata:mapa-base';
@@ -106,13 +106,14 @@ function toast(message) {
 
 function fit(bounds) {
   if (!bounds?.isValid()) return;
-  const showCard = !$('detail').hidden;
+  const showCard = !$('detail').hidden || !$('place-detail').hidden;
   const mobile = matchMedia('(max-width: 700px)').matches;
   const right = showCard && !mobile ? Math.min(420, map.getSize().x * .52) : 40;
   map.fitBounds(bounds, { paddingTopLeft: [30, 70], paddingBottomRight: [right, 50], maxZoom: 16, animate: !matchMedia('(prefers-reduced-motion: reduce)').matches });
 }
 
 function fitSelection() {
+  if (state.place && !$('place-detail').hidden && placeLayer?.getLayers().length) { fit(placeLayer.getBounds()); return; }
   const bounds = neighborhoodLayers.get(state.neighborhood)?.getBounds() || delegationLayers.get(state.delegation)?.getBounds();
   if (bounds) fit(bounds);
   else fitPartido();
@@ -132,7 +133,7 @@ function fitPartido() {
 }
 
 function writeHash() {
-  const value = selectionHash(state.delegation, state.neighborhood);
+  const value = selectionHash(state.delegation, state.neighborhood, state.place);
   if (location.hash !== value) history.pushState(null, '', location.pathname + location.search + value);
 }
 
@@ -177,7 +178,7 @@ function row(feature, kind) {
 
 function renderResults() {
   const container = $('results'), fragment = document.createDocumentFragment();
-  const { delegations, neighborhoods } = searchIndex(state.index, state.query, state.delegation);
+  const { delegations, neighborhoods, places } = searchIndex(state.index, state.query, state.delegation);
   let count = 0;
   if (!state.delegation && !state.query.trim()) {
     $('results-heading').textContent = 'Delegaciones';
@@ -195,10 +196,19 @@ function renderResults() {
       neighborhoods.forEach(f => fragment.append(row(f, 'barrio')));
       count += neighborhoods.length;
     }
+    if (state.query.trim()) {
+      for (const [kind, label] of [['educacion', 'EDUCACIÓN'], ['salud', 'SALUD'], ['urbanizacion', 'URBANIZACIONES INFORMALES']]) {
+        const matches = places.filter(f => f.properties.tipo === kind);
+        if (!matches.length) continue;
+        fragment.append(text('p', `${label} (${matches.length})`, 'section-label'));
+        matches.forEach(f => fragment.append(placeRow(f)));
+        count += matches.length;
+      }
+    }
   }
-  if (!count) fragment.append(text('p', 'No hay coincidencias. Probá con otro nombre, código o cuenca, o presioná «Ver todo» para buscar en todo el partido.', 'empty'));
+  if (!count) fragment.append(text('p', 'No hay coincidencias. Probá con otro nombre, número o código, o presioná «Ver todo» para buscar en todo el partido.', 'empty'));
   container.replaceChildren(fragment);
-  $('results-count').textContent = `${count} resultados`;
+  $('results-count').textContent = `${count} ${count === 1 ? 'resultado' : 'resultados'}`;
 }
 
 function showLayers() {
@@ -218,6 +228,7 @@ function renderNeighborhoods() {
 
 function selectDelegation(id, { zoom = true, hash = true, clearQuery = true } = {}) {
   if (id && !state.index.byD.has(id)) return;
+  clearPlace();
   state.delegation = id;
   state.neighborhood = '';
   $('detail').hidden = true;
@@ -231,11 +242,18 @@ function selectDelegation(id, { zoom = true, hash = true, clearQuery = true } = 
   if (hash) writeHash();
 }
 
-function selectNeighborhood(id, { zoom = true, hash = true } = {}) {
+function selectNeighborhood(id, { zoom = true, hash = true, keepPlace = !!state.place } = {}) {
   const feature = state.index.byB.get(id);
   if (!feature) return;
   const p = feature.properties, dId = String(p.delegacion_id);
-  if (state.delegation !== dId) selectDelegation(dId, { zoom: false, hash: false });
+  const placeId = keepPlace && state.index.byP.get(state.place)?.properties.barrio_ids.includes(id) ? state.place : '';
+  if (!placeId) clearPlace();
+  if (state.delegation !== dId) {
+    selectDelegation(dId, { zoom: false, hash: false, clearQuery: false });
+    if (placeId) { state.place = placeId; drawPlace(state.index.byP.get(placeId)); }
+  }
+  $('place-detail').hidden = true;
+  $('back-to-place').hidden = !placeId;
   state.neighborhood = id;
   $('toggle-neighborhoods').checked = true;
   showLayers();
@@ -266,14 +284,99 @@ function selectNeighborhood(id, { zoom = true, hash = true } = {}) {
   if (hash) writeHash();
 }
 
+function clearPlace() {
+  state.place = '';
+  placeLayer?.clearLayers();
+  $('place-detail').hidden = true;
+  $('back-to-place').hidden = true;
+}
+
+function placeRow(feature) {
+  const p = feature.properties, button = text('button', '', 'result-row place-result' + (state.place === p.id ? ' selected' : ''));
+  button.type = 'button';
+  button.setAttribute('aria-pressed', String(state.place === p.id));
+  const icon = text('span', p.tipo === 'educacion' ? 'E' : p.tipo === 'salud' ? '+' : 'U', 'row-icon place-kind');
+  icon.setAttribute('aria-hidden', 'true');
+  const body = text('span', '', 'row-text');
+  body.append(text('span', p.nombre, 'row-title'));
+  const territory = p.delegacion_ids.map(id => prettyLabel(state.index.byD.get(id).properties.nombre)).join(' · ');
+  body.append(text('span', `${placeLabels[p.tipo]} · ${feature.geometry ? territory || 'Ubicación en el mapa' : 'Ubicación por verificar'}`, 'row-subtitle'));
+  button.append(icon, body, text('span', '›', 'row-arrow'));
+  button.addEventListener('click', () => selectPlace(p.id));
+  return button;
+}
+
+function drawPlace(feature) {
+  placeLayer.clearLayers();
+  if (feature.geometry) placeLayer.addData(feature);
+}
+
+function selectPlace(id, { zoom = true, hash = true } = {}) {
+  const feature = state.index.byP.get(id);
+  if (!feature) return;
+  const p = feature.properties;
+  const currentD = p.delegacion_ids.includes(state.delegation) ? state.delegation : p.delegacion_ids.length === 1 ? p.delegacion_ids[0] : '';
+  selectDelegation(currentD, { zoom: false, hash: false, clearQuery: false });
+  state.place = id;
+  // Show every intersected delegation's barrios for an area spanning boundaries.
+  if (feature.geometry && p.delegacion_ids.length > 1) {
+    neighborhoodLayer.clearLayers();
+    neighborhoodLayers.clear();
+    const features = p.delegacion_ids.flatMap(d => state.index.groups.get(d));
+    neighborhoodLayer.addData({ type: 'FeatureCollection', features });
+  }
+  $('toggle-neighborhoods').checked = true;
+  showLayers();
+  drawPlace(feature);
+  if (p.barrio_ids.length === 1) neighborhoodLayers.get(p.barrio_ids[0])?.setStyle(mapStyles().neighborhoodSelected);
+  $('place-kind').textContent = placeLabels[p.tipo];
+  $('place-name').textContent = p.nombre;
+  const facts = $('place-facts'); facts.replaceChildren();
+  const fact = (label, value) => {
+    if (!value) return;
+    const item = document.createElement('div'); item.append(text('dt', label), text('dd', value)); facts.append(item);
+  };
+  fact(p.delegacion_ids.length > 1 ? 'Delegaciones' : 'Delegación', p.delegacion_ids.map(d => prettyLabel(state.index.byD.get(d).properties.nombre)).join(' · '));
+  fact('Dirección de referencia', p.direccion);
+  if (p.codigo_origen) fact('Código', p.codigo_origen);
+  $('place-location-note').textContent = !feature.geometry ? p.ubicacion_nota || 'Ubicación por verificar.' : p.descripcion || '';
+  $('place-location-note').hidden = !$('place-location-note').textContent;
+  $('place-location-note').className = feature.geometry ? 'protocol-note' : 'location-pending';
+  const links = $('place-neighborhoods'); links.replaceChildren();
+  if (p.barrio_ids.length) {
+    links.append(text('p', p.tipo === 'urbanizacion' ? 'Barrios que intersectan esta área' : 'Barrio de esta ubicación', 'place-section-title'));
+    for (const bId of p.barrio_ids) {
+      const b = state.index.byB.get(bId).properties;
+      const button = text('button', '', 'place-neighborhood-button'); button.type = 'button';
+      button.append(text('strong', `${b.id} · ${b.nombre}`));
+      const available = protocolUrl(b.protocolo, state.config.protocolos_base, document.baseURI);
+      button.append(text('span', available ? 'Ver barrio y protocolo →' : 'Ver barrio · Protocolo en elaboración →'));
+      button.addEventListener('click', () => selectNeighborhood(bId, { zoom: true, keepPlace: true }));
+      links.append(button);
+    }
+  } else if (feature.geometry) {
+    links.append(text('p', 'Esta ubicación no coincide con un barrio de la cartografía actual. Podés explorar los barrios del mapa.', 'protocol-note'));
+  }
+  $('place-source').textContent = ['Fuente: ' + p.fuente, p.fuente_direccion ? 'Dirección: ' + p.fuente_direccion : ''].filter(Boolean).join('. ');
+  $('detail').hidden = true;
+  $('place-detail').hidden = false;
+  renderResults();
+  if (zoom) { if (feature.geometry) fit(placeLayer.getBounds()); else fitPartido(); }
+  if (zoom && matchMedia('(max-width: 700px)').matches) document.querySelector('.map-shell').scrollIntoView({ block: 'start', behavior: 'smooth' });
+  if (hash) writeHash();
+}
+
 function applyHash() {
   const params = new URLSearchParams(location.hash.slice(1));
-  const b = params.get('barrio'), d = params.get('delegacion');
-  if (b && state.index.byB.has(b)) selectNeighborhood(b, { hash: false });
+  const b = params.get('barrio'), d = params.get('delegacion'), p = params.get('lugar');
+  if (p && state.index.byP.has(p)) {
+    selectPlace(p, { hash: false });
+    if (b && state.index.byP.get(p).properties.barrio_ids.includes(b)) selectNeighborhood(b, { hash: false, keepPlace: true });
+  } else if (b && state.index.byB.has(b)) selectNeighborhood(b, { hash: false });
   else if (d && state.index.byD.has(d)) selectDelegation(d, { hash: false });
   else {
     selectDelegation('', { hash: false });
-    if (b || d) toast('La selección del enlace no existe en las capas cargadas.');
+    if (b || d || p) toast('La selección del enlace no existe en las capas cargadas.');
   }
 }
 
@@ -316,6 +419,13 @@ function setupEvents() {
   $('reset-button').addEventListener('click', () => selectDelegation(''));
   $('fit-button').addEventListener('click', fitSelection);
   $('close-detail').addEventListener('click', () => selectDelegation(state.delegation, { clearQuery: false }));
+  $('close-place').addEventListener('click', () => selectDelegation(state.delegation, { clearQuery: false }));
+  $('back-to-place').addEventListener('click', () => selectPlace(state.place));
+  $('share-place').addEventListener('click', async () => {
+    const url = new URL(location.href); url.hash = selectionHash('', '', state.place);
+    try { await navigator.clipboard.writeText(url.href); toast('Enlace al lugar copiado.'); }
+    catch { toast('Podés copiar el enlace desde la barra de direcciones.'); }
+  });
   $('open-protocol').addEventListener('click', openProtocol);
   $('toggle-delegations').addEventListener('change', showLayers);
   $('toggle-neighborhoods').addEventListener('change', showLayers);
@@ -326,7 +436,7 @@ function setupEvents() {
   $('protocol-dialog').addEventListener('close', () => $('protocol-body').replaceChildren());
   $('share-button').addEventListener('click', async () => {
     const url = new URL(location.href);
-    url.hash = selectionHash(state.delegation, state.neighborhood);
+    url.hash = selectionHash(state.delegation, state.neighborhood, state.place);
     try { await navigator.clipboard.writeText(url.href); toast('Enlace al barrio copiado.'); }
     catch { toast('Podés copiar el enlace desde la barra de direcciones.'); }
   });
@@ -338,9 +448,9 @@ function setupEvents() {
 async function start() {
   if (location.protocol === 'file:') return;
   const config = await jsonFile('config.json');
-  const [delegations, neighborhoods, partido] = await Promise.all([jsonFile(config.delegaciones), jsonFile(config.barrios), jsonFile(config.partido)]);
+  const [delegations, neighborhoods, partido, places] = await Promise.all([jsonFile(config.delegaciones), jsonFile(config.barrios), jsonFile(config.partido), config.lugares ? jsonFile(config.lugares) : { type: 'FeatureCollection', features: [] }]);
   state.config = config;
-  state.index = buildIndex(delegations, neighborhoods);
+  state.index = buildIndex(delegations, neighborhoods, places);
   document.title = config.titulo_pagina || config.titulo;
   $('site-title').textContent = config.titulo;
   $('site-subtitle').textContent = config.subtitulo;
@@ -395,6 +505,22 @@ async function start() {
       layer.on('click', () => selectNeighborhood(id));
       layer.on('mouseover', () => layer.setStyle({ fillOpacity: .43 }));
       layer.on('mouseout', () => layer.setStyle(id === state.neighborhood ? mapStyles().neighborhoodSelected : mapStyles().neighborhood));
+    }
+  }).addTo(map);
+  map.createPane('places');
+  map.getPane('places').style.zIndex = '430';
+  placeLayer = L.geoJSON(null, {
+    pane: 'places',
+    style: { color: '#005a99', weight: 3, dashArray: '7 4', fillColor: '#29b6e8', fillOpacity: .12, interactive: false },
+    pointToLayer: (feature, latlng) => L.marker(latlng, {
+      title: feature.properties.nombre, alt: feature.properties.nombre,
+      icon: L.divIcon({ className: 'place-map-marker', html: '<span aria-hidden="true">●</span>', iconSize: [30, 30], iconAnchor: [15, 15] })
+    }),
+    onEachFeature: (feature, layer) => {
+      if (feature.geometry.type === 'Point') {
+        layer.bindTooltip(text('span', feature.properties.nombre), { direction: 'top', offset: [0, -15] });
+        layer.on('click', () => selectPlace(idOf(feature), { zoom: false }));
+      }
     }
   }).addTo(map);
   allBounds = partidoLayer.getBounds();

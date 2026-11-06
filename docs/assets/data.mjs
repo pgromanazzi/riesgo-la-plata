@@ -51,7 +51,42 @@ export function validateData(delegations, neighborhoods) {
   return errors;
 }
 
-export function buildIndex(delegations, neighborhoods) {
+export const placeLabels = { educacion: 'Educación', salud: 'Salud', urbanizacion: 'Urbanización informal' };
+
+export function validatePlaces(places, dIds, bIds) {
+  const errors = [], ids = new Set();
+  if (places?.type !== 'FeatureCollection' || !Array.isArray(places.features)) return ['lugares: se requiere FeatureCollection.'];
+  for (const f of places.features) {
+    const p = f?.properties;
+    if (f?.type !== 'Feature' || !p || typeof p.id !== 'string' || !p.id || typeof p.nombre !== 'string' || !p.nombre.trim()) {
+      errors.push('Lugar sin ID o nombre válido.'); continue;
+    }
+    if (ids.has(p.id)) errors.push(`Lugar duplicado: ${p.id}.`);
+    ids.add(p.id);
+    if (!Object.hasOwn(placeLabels, p.tipo)) errors.push(`${p.id}: tipo de lugar desconocido.`);
+    for (const [key, known] of [['delegacion_ids', dIds], ['barrio_ids', bIds]]) {
+      if (!Array.isArray(p[key]) || p[key].some(id => !known.has(String(id)))) errors.push(`${p.id}: ${key} contiene referencias inválidas.`);
+    }
+    if (!f.geometry) {
+      if (p.ubicacion_estado !== 'por_verificar' || p.delegacion_ids?.length || p.barrio_ids?.length) errors.push(`${p.id}: una ubicación pendiente no puede tener asignación territorial.`);
+    } else if (f.geometry.type === 'Point') {
+      const c = f.geometry.coordinates;
+      if (!Array.isArray(c) || c.length !== 2 || !c.every(Number.isFinite) || Math.abs(c[0]) > 180 || Math.abs(c[1]) > 90) errors.push(`${p.id}: punto fuera de WGS84.`);
+    } else {
+      const e = polygonError(f.geometry);
+      if (e) errors.push(`${p.id}: ${e}`);
+    }
+  }
+  return errors;
+}
+
+function placeTerms(value) {
+  return normalize(value).replace(/[.°º]/g, '').replace(/([a-z])(\d)/g, '$1 $2').replace(/(\d)([a-z])/g, '$1 $2')
+    .replace(/\b(?:n|nro|numero)\s*(?=\d)/g, '').replace(/[^a-z0-9]+/g, ' ').trim().split(/\s+/)
+    .filter(Boolean).map(term => /^\d+$/.test(term) ? term.replace(/^0+(?=\d)/, '') : term);
+}
+
+export function buildIndex(delegations, neighborhoods, places = { type: 'FeatureCollection', features: [] }) {
   const errors = validateData(delegations, neighborhoods);
   if (errors.length) throw new Error(errors.slice(0, 8).join('\n') + (errors.length > 8 ? `\n… y ${errors.length - 8} errores más.` : ''));
   const dList = [...delegations.features].sort(compareNames), bList = [...neighborhoods.features].sort(compareNames);
@@ -59,7 +94,18 @@ export function buildIndex(delegations, neighborhoods) {
   const byB = new Map(bList.map(f => [idOf(f), f]));
   const groups = new Map(dList.map(f => [idOf(f), []]));
   bList.forEach(f => groups.get(String(f.properties.delegacion_id)).push(f));
-  return { dList, bList, byD, byB, groups };
+  const placeErrors = validatePlaces(places, new Set(byD.keys()), new Set(byB.keys()));
+  if (placeErrors.length) throw new Error(placeErrors.slice(0, 8).join('\n'));
+  const pList = [...places.features].sort(compareNames), byP = new Map(pList.map(f => [idOf(f), f]));
+  const placeSearch = new Map(pList.map(f => {
+    const p = f.properties;
+    const identityTerms = placeTerms([p.id, p.nombre, p.codigo_origen, ...(p.aliases || [])].join(' '));
+    const terms = placeTerms([p.id, p.nombre, p.codigo_origen, placeLabels[p.tipo], p.direccion, ...(p.aliases || []),
+      ...p.delegacion_ids.map(id => byD.get(String(id)).properties.nombre),
+      ...p.barrio_ids.flatMap(id => [id, byB.get(String(id)).properties.nombre])].join(' '));
+    return [p.id, { text: terms.join(' '), numbers: new Set(identityTerms.filter(t => /^\d+$/.test(t))), allNumbers: new Set(terms.filter(t => /^\d+$/.test(t))) }];
+  }));
+  return { dList, bList, byD, byB, groups, pList, byP, placeSearch };
 }
 
 export function searchIndex(index, query, delegationId = '') {
@@ -71,7 +117,14 @@ export function searchIndex(index, query, delegationId = '') {
     const p = f.properties;
     return matches([p.id, p.nombre, p.cuenca, index.byD.get(String(p.delegacion_id))?.properties.nombre].join(' '));
   });
-  return { delegations: ds, neighborhoods: bs };
+  const pTerms = placeTerms(query);
+  const numberedInstitution = pTerms.some(t => ['escuela', 'colegio', 'primaria', 'secundaria', 'jardin', 'caps', 'centro', 'sanitaria', 'ep', 'ees', 'eest', 'ji'].includes(t));
+  const ps = index.pList.filter(f => {
+    if (delegationId && !f.properties.delegacion_ids.includes(String(delegationId))) return false;
+    const entry = index.placeSearch.get(idOf(f));
+    return pTerms.every(t => /^\d+$/.test(t) ? (numberedInstitution ? entry.numbers : entry.allNumbers).has(t) : entry.text.includes(t));
+  });
+  return { delegations: ds, neighborhoods: bs, places: ps };
 }
 
 export function protocolUrl(value, base, pageHref) {
@@ -90,8 +143,9 @@ export function protocolUrl(value, base, pageHref) {
   } catch { return null; }
 }
 
-export function selectionHash(delegationId, neighborhoodId) {
+export function selectionHash(delegationId, neighborhoodId, placeId = '') {
   const params = new URLSearchParams();
+  if (placeId) params.set('lugar', placeId);
   if (neighborhoodId) params.set('barrio', neighborhoodId);
   else if (delegationId) params.set('delegacion', delegationId);
   return params.size ? '#' + params.toString() : '';
