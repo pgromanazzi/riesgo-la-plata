@@ -4,7 +4,7 @@
   "subtitulo": "Programa de Reducción del Riesgo por Inundaciones",
   "edicion": "Etapa III",
   "version": "3.08",
-  "fecha_version": "05/11/2026",
+  "fecha_version": "06/11/2026",
   "aviso": "Cartografía 2026 corregida y aprobada",
   "fuente": "https://riesgolaplata.org/",
   "fecha_datos": "Capas aprobadas el 04/11/2026; protocolos enlazados por código al sitio de referencia",
@@ -18,7 +18,7 @@
   "zoom": 11,
   "mapa_base": "osm",
   "institucion": "Dirección General de Riesgo Hídrico",
-  "unidad": "Unidad de Gestión del Riesgo",
+  "unidad": "Unidad de Gestión del Riesgo La Plata",
   "partido": "data/partido.geojson",
   "lugares": "data/lugares.geojson"
 }
