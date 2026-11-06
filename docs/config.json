@@ -3,7 +3,7 @@
   "titulo_pagina": "Protocolos Barriales · La Plata · 2026",
   "subtitulo": "Programa de Reducción del Riesgo por Inundaciones",
   "edicion": "Etapa III",
-  "version": "3.11",
+  "version": "3.12",
   "fecha_version": "06/11/2026",
   "aviso": "Cartografía 2026 corregida y aprobada",
   "fuente": "https://riesgolaplata.org/",
@@ -24,5 +24,6 @@
   "cuencas": "data/cuencas.geojson",
   "crs_origen_territorial": "POSGAR 2007 / Faja 5 · EPSG:5347",
   "crs_origen_cuencas": "WGS 84 · EPSG:4326",
-  "crs_visualizacion": "Web Mercator · EPSG:3857"
+  "crs_visualizacion": "Web Mercator · EPSG:3857",
+  "crs_archivos_web": "WGS 84 · EPSG:4326"
 }

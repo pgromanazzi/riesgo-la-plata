@@ -1,6 +1,6 @@
 {
   "fecha_preparacion": "2026-11-06",
-  "version": "3.11",
+  "version": "3.12",
   "fuente": "Cuencas_LaPlata_2023.gpkg",
   "sha256_fuente": "ac9b0b086c638a8e4315f74158764dae848eaa75583b6a78a545026d7ade9967",
   "crs_origen_cuencas": "WGS 84 / EPSG:4326",
@@ -26,7 +26,7 @@
     },
     {
       "id": "CU-CARNAVAL",
-      "nombre": "Arroyo Carnaval",
+      "nombre": "Arroyo Carnaval - Martín",
       "area_origen_km2": 78.51345052078098,
       "area_recortada_km2": 77.4403321603631,
       "area_fuera_partido_km2": 0.0,
@@ -114,5 +114,85 @@
       "etiquetas_interiores": 24,
       "geometria_valida": true
     }
-  ]
+  ],
+  "cambios_v312": [
+    "Cuencas como capa independiente de los tres fondos: Calles · OpenStreetMap, Satélite · Google Hybrid y Topográfico · OpenTopoMap.",
+    "Nombre visible corregido a Arroyo Carnaval - Martín; se conserva el nombre de origen como trazabilidad.",
+    "CRS común del visor fijado explícitamente en EPSG:3857 para todos los fondos y capas.",
+    "Etiquetas de 10 px en la vista general de 5 km, con tamaño gradual entre 9 y 13 px según el zoom."
+  ],
+  "verificacion_crs_v312": {
+    "crs_visualizacion_comun": "EPSG:3857",
+    "crs_geojson": "EPSG:4326",
+    "crs_gpkg_cuencas_comprobado": "EPSG:4326",
+    "capas": [
+      {
+        "capa": "partido",
+        "entidades": 1,
+        "vertices": 238,
+        "error_ida_vuelta_3857_grados_max": 2.1316282072803006e-14,
+        "diferencia_GDAL_formula_Leaflet_m_max": 1.862645149230957e-09,
+        "extension_3857_m": [
+          -6488651.948753824,
+          -4195920.202997511,
+          -6429164.976571,
+          -4141485.8192846617
+        ]
+      },
+      {
+        "capa": "delegaciones",
+        "entidades": 23,
+        "vertices": 231951,
+        "error_ida_vuelta_3857_grados_max": 2.5618982671915014e-14,
+        "diferencia_GDAL_formula_Leaflet_m_max": 2.3283064365386963e-09,
+        "extension_3857_m": [
+          -6488641.989441193,
+          -4195920.20298274,
+          -6429171.126040163,
+          -4141494.284533405
+        ]
+      },
+      {
+        "capa": "barrios",
+        "entidades": 735,
+        "vertices": 346966,
+        "error_ida_vuelta_3857_grados_max": 2.842170943040401e-14,
+        "diferencia_GDAL_formula_Leaflet_m_max": 2.3283064365386963e-09,
+        "extension_3857_m": [
+          -6488613.825025049,
+          -4182452.2914199713,
+          -6435554.389218852,
+          -4141766.9959070175
+        ]
+      },
+      {
+        "capa": "lugares",
+        "entidades": 850,
+        "vertices": 2680,
+        "error_ida_vuelta_3857_grados_max": 2.5618982671915014e-14,
+        "diferencia_GDAL_formula_Leaflet_m_max": 1.862645149230957e-09,
+        "extension_3857_m": [
+          -6482204.542185451,
+          -4172092.3763032444,
+          -6438789.839659928,
+          -4143509.611030474
+        ]
+      },
+      {
+        "capa": "cuencas",
+        "entidades": 11,
+        "vertices": 10568,
+        "error_ida_vuelta_3857_grados_max": 2.5618982671915014e-14,
+        "diferencia_GDAL_formula_Leaflet_m_max": 2.3283064365386963e-09,
+        "extension_3857_m": [
+          -6488651.948753824,
+          -4195812.237998192,
+          -6429164.976571,
+          -4141485.8192846617
+        ]
+      }
+    ],
+    "geometria_cuencas": "Las 11 geometrías coinciden topológicamente con la intersección del GeoPackage original y el límite municipal en EPSG:4326. Ninguna geometría web tiene porción exterior en ese CRS.",
+    "transformacion": "Todas las coordenadas se transformaron a EPSG:3857 mediante GDAL y se contrastaron con las ecuaciones de Mercator esférico de Leaflet. La comprobación verifica la conversión numérica, no la precisión posicional de los datos de origen."
+  }
 }

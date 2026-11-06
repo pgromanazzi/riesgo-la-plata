@@ -1,14 +1,15 @@
 import { buildIndex, searchIndex, idOf, protocolUrl, selectionHash, resolveNeighborhoodId, placeLabels } from './data.mjs?v=20261106.309';
-import { mapViews, mapView, fallbackView, insideBasin, validateBasins, layoutBasinLabels } from './cartography.mjs?v=20261106.311';
+import { basemapIds, mapPreferences, insideBasin, validateBasins, layoutBasinLabels } from './cartography.mjs?v=20261106.312';
 
 const $ = id => document.getElementById(id);
-const state = { delegation: '', neighborhood: '', place: '', query: '', basemap: '', config: null, index: null };
+const state = { delegation: '', neighborhood: '', place: '', query: '', basemap: '', basins: false, overviewZoom: null, config: null, index: null };
 let map, partidoLayer, delegationLayer, neighborhoodLayer, placeLayer, allBounds, baseLayer, scaleControl, toastTimer;
 let basinLayer, basinOutline, basinHalo, basinNames, basinLabelFrame;
 const basinLabels = [];
 const delegationLayers = new Map(), neighborhoodLayers = new Map();
 const baseLayers = new Map();
 const basemapPreferenceKey = 'prri-la-plata:mapa-base';
+const basinsPreferenceKey = 'prri-la-plata:cuencas';
 const styles = {
   delegation: { color: '#004389', weight: 1.4, fillColor: '#0074bd', fillOpacity: .15 },
   delegationSelected: { color: '#004389', weight: 2.8, fillColor: '#0074bd', fillOpacity: .1 },
@@ -23,21 +24,20 @@ const satelliteStyles = {
   neighborhood: { color: '#47d0ff', weight: 1.5, fillColor: '#0099ff', fillOpacity: .08 },
   neighborhoodSelected: { color: '#ffffff', weight: 2.8, fillColor: '#00b8ff', fillOpacity: .16 }
 };
-const mapStyles = () => mapView(state.basemap).base === 'google' ? satelliteStyles : styles;
+const mapStyles = () => state.basemap === 'google' ? satelliteStyles : styles;
 
 function selectBasemap(id, { remember = true, clearMessage = true } = {}) {
-  if (!Object.hasOwn(mapViews, id)) return;
-  const view = mapView(id);
-  const next = baseLayers.get(view.base);
+  if (!basemapIds.includes(id)) return;
+  const next = baseLayers.get(id);
   if (!next) return;
   if (baseLayer && baseLayer !== next) map.removeLayer(baseLayer);
   state.basemap = id;
   baseLayer = next;
   $('basemap-select').value = id;
-  document.querySelector('.map-shell').dataset.basemap = view.base;
+  document.querySelector('.map-shell').dataset.basemap = id;
   if (clearMessage) $('map-message').hidden = true;
   if (!map.hasLayer(baseLayer)) baseLayer.addTo(map);
-  partidoLayer?.setStyle({ color: view.base === 'google' ? '#ffffff' : '#173c63' });
+  partidoLayer?.setStyle({ color: id === 'google' ? '#ffffff' : '#173c63' });
   styleDelegations();
   neighborhoodLayers.forEach((layer, other) => layer.setStyle(other === state.neighborhood ? mapStyles().neighborhoodSelected : mapStyles().neighborhood));
   syncBasins();
@@ -57,29 +57,36 @@ function setupBasemaps() {
     minZoom: 3, maxZoom: 19, keepBuffer: 0, updateWhenIdle: true, updateWhenZooming: false,
     attribution: '&copy; <a href="https://maps.google.com/">Google Maps</a> · <a href="https://www.google.com/intl/es/help/terms_maps/">Términos de uso</a>'
   }));
+  baseLayers.set('topo', L.tileLayer('https://tile.opentopomap.org/{z}/{x}/{y}.png', {
+    minZoom: 3, maxNativeZoom: 17, maxZoom: 19, keepBuffer: 1, updateWhenIdle: true,
+    attribution: 'Datos: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, SRTM · Mapa: &copy; <a href="https://opentopomap.org/">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+  }));
   for (const [id, layer] of baseLayers) {
     let tileErrors = 0;
     layer.on('loading', () => { tileErrors = 0; });
     layer.on('tileerror', () => {
-      if (mapView(state.basemap).base !== id || ++tileErrors < 4) return;
-      if (id === 'google') {
-        selectBasemap(fallbackView(state.basemap), { remember: false, clearMessage: false });
-        toast('No se pudo cargar Google Hybrid. Se muestra OpenStreetMap; podés volver a elegir otro fondo.');
+      if (state.basemap !== id || ++tileErrors < 4) return;
+      if (id !== 'osm') {
+        selectBasemap('osm', { remember: false, clearMessage: false });
+        toast(`No se pudo cargar ${id === 'google' ? 'Google Hybrid' : 'OpenTopoMap'}. Se muestra OpenStreetMap; podés volver a elegir otro fondo.`);
       } else {
         $('map-message').textContent = 'El mapa base no está disponible. Las capas y los protocolos siguen accesibles.';
         $('map-message').hidden = false;
       }
     });
     layer.on('load', () => {
-      if (mapView(state.basemap).base === id && tileErrors === 0) $('map-message').hidden = true;
+      if (state.basemap === id && tileErrors === 0) $('map-message').hidden = true;
     });
   }
-  let selected = state.config.mapa_base || 'osm';
-  try { selected = localStorage.getItem(basemapPreferenceKey) || selected; } catch { /* Use the configured default. */ }
-  // Preserve the imagery preference for visitors upgrading from version 3.03.
-  const migrateSatellite = selected === 'satellite';
-  if (migrateSatellite) selected = 'google';
-  selectBasemap(Object.hasOwn(mapViews, selected) ? selected : 'osm', { remember: migrateSatellite });
+  let selected = state.config.mapa_base || 'osm', savedBasins = null;
+  try {
+    selected = localStorage.getItem(basemapPreferenceKey) || selected;
+    savedBasins = localStorage.getItem(basinsPreferenceKey);
+  } catch { /* Use the configured default. */ }
+  const preferences = mapPreferences(selected, savedBasins);
+  state.basins = preferences.basins;
+  selectBasemap(preferences.basemap);
+  try { localStorage.setItem(basinsPreferenceKey, String(state.basins)); } catch { /* Storage is optional. */ }
   $('basemap-select').disabled = false;
 }
 
@@ -89,11 +96,12 @@ function queueBasinLabels() {
 }
 
 function syncBasins() {
-  const active = mapView(state.basemap).basins;
+  const active = state.basins;
+  $('toggle-basins').checked = active;
   document.querySelector('.map-shell').dataset.cuencas = String(active);
   $('basin-legend').hidden = !active;
   if (!basinLayer) return;
-  const satellite = mapView(state.basemap).base === 'google';
+  const satellite = state.basemap === 'google';
   basinHalo.setStyle({ color: satellite ? '#142b43' : '#fff', weight: satellite ? 4.8 : 4.6, opacity: .9 });
   basinOutline.setStyle({ color: satellite ? '#ffe16b' : '#773b91', weight: 2.1, opacity: 1, dashArray: '7 4' });
   if (active && !map.hasLayer(basinLayer)) basinLayer.addTo(map);
@@ -127,12 +135,16 @@ function setupBasins(cuencas) {
   }
   basinLayer = L.layerGroup([basinHalo, basinOutline, basinNames]);
   $('basin-count').textContent = `${cuencas.features.length} cuencas · límites y nombres`;
+  $('toggle-basins').disabled = false;
   map.on('moveend zoomend resize', queueBasinLabels);
   syncBasins();
 }
 
 function positionBasinLabels() {
   if (!basinLayer || !map.hasLayer(basinLayer) || !map.getZoom()) return;
+  // 10 px in the overview; grow gradually with zoom without obscuring the map.
+  const labelSize = Math.max(9, Math.min(13, 10 + .8 * (map.getZoom() - (state.overviewZoom ?? state.config.zoom))));
+  document.querySelector('.map-shell').style.setProperty('--basin-label-size', `${labelSize.toFixed(1)}px`);
   const size = map.getSize(), rect = map.getContainer().getBoundingClientRect();
   const obstacles = [...document.querySelectorAll('.map-legend,.map-crs,.map-north,.map-breadcrumb,.map-actions,.leaflet-control-zoom,.leaflet-control-attribution,.leaflet-control-scale,#detail,#place-detail')]
     .filter(el => el.getClientRects().length && !el.hidden)
@@ -207,6 +219,7 @@ function fitPartido() {
   // Fractional zoom avoids jumping a whole level out when the outline almost fits.
   // Symmetric padding keeps the complete partido centered, including on small screens.
   map.fitBounds(allBounds, { padding: [24, 24], maxZoom: state.config.zoom, animate: false });
+  state.overviewZoom = map.getZoom();
   // Size the metric bar to a real 5 km at this view, also on narrow screens.
   // Leaflet continues recalculating its distance normally when the user zooms.
   const middle = map.getSize().y / 2;
@@ -519,6 +532,11 @@ function setupEvents() {
   $('open-protocol').addEventListener('click', openProtocol);
   $('toggle-delegations').addEventListener('change', showLayers);
   $('toggle-neighborhoods').addEventListener('change', showLayers);
+  $('toggle-basins').addEventListener('change', event => {
+    state.basins = event.target.checked;
+    syncBasins();
+    try { localStorage.setItem(basinsPreferenceKey, String(state.basins)); } catch { /* Storage is optional. */ }
+  });
   $('basemap-select').addEventListener('change', event => selectBasemap(event.target.value));
   $('help-button').addEventListener('click', () => $('help-dialog').showModal());
   $('close-help').addEventListener('click', () => $('help-dialog').close());
@@ -538,7 +556,7 @@ function setupEvents() {
 function renderInstitutionalLayout(config) {
   // Reconcilia también el HTML anterior que pueda conservar el navegador.
   const stylesheet = document.querySelector('link[href*="assets/styles.css"]');
-  const stylesheetUrl = new URL('assets/styles.css?v=20261106.311', document.baseURI).href;
+  const stylesheetUrl = new URL('assets/styles.css?v=20261106.312', document.baseURI).href;
   if (stylesheet && stylesheet.href !== stylesheetUrl) stylesheet.href = stylesheetUrl;
   document.querySelectorAll('.version-banner, #data-notice').forEach(element => element.remove());
   document.querySelectorAll('.sidebar-footer .unit-logo').forEach(element => element.remove());
@@ -581,9 +599,8 @@ async function start() {
   const [delegations, neighborhoods, partido, places, cuencas] = await Promise.all([jsonFile(config.delegaciones), jsonFile(config.barrios), jsonFile(config.partido), config.lugares ? jsonFile(config.lugares) : { type: 'FeatureCollection', features: [] }, jsonFile(config.cuencas)]);
   state.config = config;
   state.index = buildIndex(delegations, neighborhoods, places);
-  $('crs-territorial').textContent = `Origen territorial: ${config.crs_origen_territorial}`;
-  $('crs-basins').textContent = `Cuencas 2023: ${config.crs_origen_cuencas}`;
-  $('crs-display').textContent = `Mapa web: ${config.crs_visualizacion}`;
+  $('crs-display').textContent = config.crs_visualizacion;
+  $('help-crs').textContent = `Todas las capas y los tres fondos se muestran en ${config.crs_visualizacion}. Los archivos GeoJSON utilizan ${config.crs_archivos_web}, en longitud y latitud; el visor los proyecta a EPSG:3857 al dibujarlos. Origen territorial: ${config.crs_origen_territorial}. Origen de las cuencas: ${config.crs_origen_cuencas}.`;
   $('help-source').textContent = `${config.aviso || config.edicion}. ${config.fecha_datos}. Los archivos de protocolo se muestran sin modificar su contenido.`;
   const source = new URL(config.fuente, document.baseURI);
   if (source.protocol === 'https:') $('source-link').href = source.href;
@@ -595,7 +612,9 @@ async function start() {
   }
   $('delegation-select').disabled = false;
   if (!window.L) throw new Error('No se pudo cargar Leaflet. Verificá la carpeta vendor/leaflet.');
-  map = L.map('map', { zoomControl: false, doubleClickZoom: false, scrollWheelZoom: true, zoomSnap: .25 });
+  // Common rendering CRS for OSM, Google Hybrid, OpenTopoMap and all vectors.
+  // L.geoJSON reads longitude/latitude (EPSG:4326) and projects through this CRS.
+  map = L.map('map', { crs: L.CRS.EPSG3857, zoomControl: false, doubleClickZoom: false, scrollWheelZoom: true, zoomSnap: .25 });
   L.control.zoom({ position: 'topright', zoomInTitle: 'Acercar', zoomOutTitle: 'Alejar' }).addTo(map);
   scaleControl = L.control.scale({ position: 'bottomright', imperial: false, maxWidth: 100 }).addTo(map);
   setupBasemaps();
@@ -604,7 +623,7 @@ async function start() {
   map.getPane('partido').style.pointerEvents = 'none';
   partidoLayer = L.geoJSON(partido, {
     pane: 'partido', interactive: false,
-    style: { color: mapView(state.basemap).base === 'google' ? '#ffffff' : '#173c63', weight: 2.3, fill: false }
+    style: { color: state.basemap === 'google' ? '#ffffff' : '#173c63', weight: 2.3, fill: false }
   }).addTo(map);
   map.createPane('delegations');
   map.getPane('delegations').style.zIndex = '400';

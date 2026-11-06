@@ -1,12 +1,12 @@
-export const mapViews = Object.freeze({
-  osm: { base: 'osm', basins: false },
-  google: { base: 'google', basins: false },
-  'osm-cuencas': { base: 'osm', basins: true },
-  'google-cuencas': { base: 'google', basins: true }
-});
+export const basemapIds = Object.freeze(['osm', 'google', 'topo']);
 
-export const mapView = id => mapViews[id] || mapViews.osm;
-export const fallbackView = id => mapView(id).basins ? 'osm-cuencas' : 'osm';
+// Split preferences saved by v3.11 into an independent background and overlay.
+export function mapPreferences(savedBase, savedBasins) {
+  const basemap = basemapIds.includes(savedBase) ? savedBase : ['satellite', 'google-cuencas'].includes(savedBase) ? 'google' : 'osm';
+  const legacyBasins = ['osm-cuencas', 'google-cuencas'].includes(savedBase);
+  const basins = savedBasins === 'true' ? true : savedBasins === 'false' ? false : legacyBasins;
+  return { basemap, basins };
+}
 
 function inRing(point, ring) {
   const [x, y] = point;
