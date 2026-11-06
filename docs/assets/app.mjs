@@ -453,12 +453,27 @@ async function start() {
   state.index = buildIndex(delegations, neighborhoods, places);
   document.title = config.titulo_pagina || config.titulo;
   $('site-title').textContent = config.titulo;
-  $('site-subtitle').textContent = config.subtitulo;
+  const program = $('program-name');
+  if (program) {
+    const initials = new Set(['programa', 'reducción', 'riesgo', 'inundaciones']);
+    program.replaceChildren();
+    for (const word of config.subtitulo.split(/(\s+)/)) {
+      if (initials.has(word.toLocaleLowerCase('es'))) {
+        program.append(text('span', word[0], 'prri-initial'), document.createTextNode(word.slice(1)));
+      } else {
+        program.append(document.createTextNode(word));
+      }
+    }
+    $('program-edition').textContent = `(PRRI – ${config.edicion})`;
+  } else {
+    // Permite reemplazar los archivos completos uno por uno en GitHub.
+    $('site-subtitle').textContent = config.subtitulo;
+  }
   $('edition').textContent = `Versión ${config.version}`;
-  $('data-notice').textContent = `${config.edicion} del ${config.subtitulo} · Actualizado al ${config.fecha_version} - v. ${config.version}`;
-  $('data-notice').hidden = false;
+  if ($('updated-date')) $('updated-date').textContent = `Actualizado al ${config.fecha_version}`;
+  if ($('data-notice')) $('data-notice').textContent = `${config.edicion} del ${config.subtitulo} · Actualizado al ${config.fecha_version} - v. ${config.version}`;
   $('organization').textContent = config.institucion;
-  $('unit').textContent = config.unidad || 'Unidad de Gestión del Riesgo';
+  $('unit').textContent = config.unidad || 'Unidad de Gestión del Riesgo La Plata';
   $('help-source').textContent = `${config.aviso || config.edicion}. ${config.fecha_datos}. Los archivos de protocolo se muestran sin modificar su contenido.`;
   const source = new URL(config.fuente, document.baseURI);
   if (source.protocol === 'https:') $('source-link').href = source.href;
