@@ -445,35 +445,52 @@ function setupEvents() {
   new ResizeObserver(() => map.invalidateSize({ pan: false })).observe($('map'));
 }
 
+function renderInstitutionalLayout(config) {
+  // Reconcilia también el HTML anterior que pueda conservar el navegador.
+  const stylesheet = document.querySelector('link[href*="assets/styles.css"]');
+  const stylesheetUrl = new URL('assets/styles.css?v=20261106.308-r2', document.baseURI).href;
+  if (stylesheet && stylesheet.href !== stylesheetUrl) stylesheet.href = stylesheetUrl;
+  document.querySelectorAll('.version-banner, #data-notice').forEach(element => element.remove());
+  document.querySelectorAll('.sidebar-footer .unit-logo').forEach(element => element.remove());
+  document.title = config.titulo_pagina || config.titulo;
+  $('site-title').textContent = config.titulo;
+  const program = text('span', '');
+  program.id = 'program-name';
+  const initials = new Set(['programa', 'reducción', 'riesgo', 'inundaciones']);
+  for (const word of config.subtitulo.split(/(\s+)/)) {
+    if (initials.has(word.toLocaleLowerCase('es'))) {
+      program.append(text('span', word[0], 'prri-initial'), document.createTextNode(word.slice(1)));
+    } else {
+      program.append(document.createTextNode(word));
+    }
+  }
+  const programEdition = text('span', `(PRRI – ${config.edicion})`, 'program-edition');
+  programEdition.id = 'program-edition';
+  $('site-subtitle').replaceChildren(program, document.createTextNode(' '), programEdition);
+
+  const editionBox = document.querySelector('.header-actions .edition');
+  editionBox.removeAttribute('id');
+  editionBox.setAttribute('aria-label', 'Versión y actualización');
+  const edition = text('span', `Versión ${config.version}`);
+  edition.id = 'edition';
+  const updated = text('small', `Actualizado al ${config.fecha_version}`);
+  updated.id = 'updated-date';
+  editionBox.replaceChildren(edition, updated);
+
+  const unit = text('strong', config.unidad || 'Unidad de Gestión del Riesgo La Plata');
+  unit.id = 'unit';
+  const organization = text('span', config.institucion);
+  organization.id = 'organization';
+  document.querySelector('.sidebar-footer .footer-copy').replaceChildren(unit, organization);
+}
+
 async function start() {
   if (location.protocol === 'file:') return;
   const config = await jsonFile('config.json');
+  renderInstitutionalLayout(config);
   const [delegations, neighborhoods, partido, places] = await Promise.all([jsonFile(config.delegaciones), jsonFile(config.barrios), jsonFile(config.partido), config.lugares ? jsonFile(config.lugares) : { type: 'FeatureCollection', features: [] }]);
   state.config = config;
   state.index = buildIndex(delegations, neighborhoods, places);
-  document.title = config.titulo_pagina || config.titulo;
-  $('site-title').textContent = config.titulo;
-  const program = $('program-name');
-  if (program) {
-    const initials = new Set(['programa', 'reducción', 'riesgo', 'inundaciones']);
-    program.replaceChildren();
-    for (const word of config.subtitulo.split(/(\s+)/)) {
-      if (initials.has(word.toLocaleLowerCase('es'))) {
-        program.append(text('span', word[0], 'prri-initial'), document.createTextNode(word.slice(1)));
-      } else {
-        program.append(document.createTextNode(word));
-      }
-    }
-    $('program-edition').textContent = `(PRRI – ${config.edicion})`;
-  } else {
-    // Permite reemplazar los archivos completos uno por uno en GitHub.
-    $('site-subtitle').textContent = config.subtitulo;
-  }
-  $('edition').textContent = `Versión ${config.version}`;
-  if ($('updated-date')) $('updated-date').textContent = `Actualizado al ${config.fecha_version}`;
-  if ($('data-notice')) $('data-notice').textContent = `${config.edicion} del ${config.subtitulo} · Actualizado al ${config.fecha_version} - v. ${config.version}`;
-  $('organization').textContent = config.institucion;
-  $('unit').textContent = config.unidad || 'Unidad de Gestión del Riesgo La Plata';
   $('help-source').textContent = `${config.aviso || config.edicion}. ${config.fecha_datos}. Los archivos de protocolo se muestran sin modificar su contenido.`;
   const source = new URL(config.fuente, document.baseURI);
   if (source.protocol === 'https:') $('source-link').href = source.href;
