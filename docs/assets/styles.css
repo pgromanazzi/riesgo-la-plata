@@ -39,18 +39,18 @@ dialog{border:1px solid #d1e0e6;border-radius:9px;padding:0;color:var(--ink);box
   display: block;
   margin: 0;
   color: #fff;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 800;
   line-height: 1.35;
 }
 .sidebar-footer #organization {
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 600;
   line-height: 1.4;
   color: #fff;
 }
 .sidebar-footer .footer-note {
-  margin: 12px 0 0;
+  margin: 10px 0 0;
   font-size: 12px;
   font-weight: 500;
   line-height: 1.55;
